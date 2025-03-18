@@ -13,7 +13,7 @@ library(tidyverse)
 
 Upload data, select rows and columns
 ```{r}
-data <- read_csv("../Downloads/im_study_results.csv")
+data <- read_csv("../Data/im_study_results.csv")
 
 data <- data[3:365,]
 
@@ -46,7 +46,7 @@ unique(clean_data$Q42)
 
 ```{r}
 clean_data %>%
-  ggplot(aes(x=Q1, y=..prop.., group=1)) + 
+  ggplot(aes(x=Q1, y=after_stat(prop), group=1)) + 
   geom_bar() + 
   scale_y_continuous(labels = scales::percent_format()) +  # Convert to percentage format
   labs(y="", x="", title="Do you use any form of social media?") + theme_minimal()
@@ -81,18 +81,58 @@ social_media_counts %>% arrange(percent) %>%
   scale_fill_manual(values = social_media_colors) 
 
 clean_data %>%
-  ggplot(aes(x=Q6, y=..prop.., group=1)) + 
+  ggplot(aes(x=Q6, y=after_stat(prop), group=1)) + 
   geom_bar() + 
   scale_y_continuous(labels = scales::percent_format()) +  # Convert to percentage format
   labs(y="", x="", title="How many hours per day do you spend on social media?") + theme_minimal()
 
 clean_data %>%
-  ggplot(aes(x=Q20, y=..prop.., group=1, fill=Q20)) + 
+  ggplot(aes(x=Q20, y=after_stat(prop), group=1, fill=Q20)) + 
   geom_bar() + 
   scale_y_continuous(labels = scales::percent_format()) +  # Convert to percentage format
   labs(y="", x="", title="How many hours per day do you spend on social media?") + theme_minimal() + coord_flip()
 ```
+Influencer Content
+```{r}
+#how often do you interact with influencer content
 
+#which influencers do you know
+```
+
+
+Self-Esteem Scores (Q17_1 to Q17_10)
+
+This should be that the higher your score, the better your self esteem is. Does Sammi's go the opposite way?
+```{r}
+library(stringr)
+
+self_esteem <- clean_data %>%
+  mutate(across(starts_with("Q17_"), ~ as.numeric(str_extract(.x, "^\\d+"))))
+
+questions_to_reverse <- c("Q17_1", "Q17_3", "Q17_4", "Q17_7", "Q17_10")
+
+self_esteem <- self_esteem %>%
+  mutate(across(all_of(questions_to_reverse), ~ case_when(
+    .x == 4 ~ 1,
+    .x == 1 ~ 4,
+    .x == 2 ~ 3,
+    .x == 3 ~ 2,
+    TRUE ~ .x  # Keeps other values unchanged
+  )))
+
+self_esteem <- self_esteem %>%
+  rowwise() %>%
+  mutate(Q17_total = sum(c_across(starts_with("Q17_")), na.rm = TRUE)) %>%
+  ungroup()
+
+hist(self_esteem$Q17_total)
+
+# Perform t-test comparing Q17_total between Group A and B
+t_test_result <- t.test(Q17_total ~ Q33, data = self_esteem)
+
+# Print the result
+print(t_test_result)
+```
 
 
 
