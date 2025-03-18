@@ -1,0 +1,258 @@
+---
+title: "Influencer Marketing Survey 1"
+output: 
+  github_document:
+    toc: true
+date: "2025-03-15"
+---
+
+
+```{r}
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+```
+
+
+# Read in Data
+```{r}
+survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
+head(survey_data)
+```
+
+# Fix Column Names
+```{r}
+# get rid of columns
+survey_data <- survey_data %>%
+  select(-c(X..ImportId...startDate...timeZone...America.Denver..,
+            X..ImportId...endDate...timeZone...America.Denver.., 
+            X..ImportId...finished.., # all were true
+            X..ImportId...status..,  # all were IP address, besides the first one-Survey Preview
+            X..ImportId...ipAddress.., 
+            X..ImportId...progress..,  # all were 100
+            X..ImportId...recordedDate...timeZone...America.Denver.., 
+            X..ImportId...recipientLastName.., 
+            X..ImportId...recipientFirstName.., 
+            X..ImportId...recipientEmail.., 
+            X..ImportId...externalDataReference.., 
+            X..ImportId...locationLatitude.., 
+            X..ImportId...locationLongitude.., 
+            X..ImportId...distributionChannel..,  #all were anonymous, except first -preview
+            X..ImportId...userLanguage..,  # all were english
+            X..ImportId...QID53_FIRST_CLICK.., #dont think we need when they clicked on the page while viewing the ad?
+            X..ImportId...QID53_LAST_CLICK..,
+            X..ImportId...QID53_PAGE_SUBMIT..,
+            X..ImportId...QID53_CLICK_COUNT..,
+            X..ImportId...QID52_FIRST_CLICK..,
+            X..ImportId...QID52_LAST_CLICK..,
+            X..ImportId...QID52_PAGE_SUBMIT..,
+            X..ImportId...QID52_CLICK_COUNT..
+            ))
+
+# rename column names
+colnames(survey_data)
+
+survey_data <- survey_data %>%
+  rename(
+    Duration_sec = `X..ImportId...duration..`,
+    RecordId = X..ImportId..._recordId..,
+    RecaptchaScore = X..ImportId...Q_RecaptchaScore..,
+    Gender = `X..ImportId...QID22..`,
+    UsesSocialMedia = X..ImportId...QID1..,
+    PlatformsUsed = X..ImportId...QID5..,
+    OtherPlatforms = X..ImportId...QID5_6_TEXT..,
+    HoursPerDay = X..ImportId...QID6..,
+    MainPurpose = X..ImportId...QID20..,
+    OtherReasons = X..ImportId...QID20_5_TEXT..,
+    InteractWithInfluencers = X..ImportId...QID21..,
+    FamiliarInfluencers = X..ImportId...QID40..,
+    ProductCheck = X..ImportId...QID14..,
+    BrandCheck = X..ImportId...QID33..,
+    WhoPosted = X..ImportId...QID42..,
+    Influencer = X..ImportId...QID16..,
+    Age = X..ImportId...QID7..,
+    Employment = X..ImportId...QID9..,
+    MaritalStatus = X..ImportId...QID10..,
+    Income = X..ImportId...QID47..
+  )
+head(survey_data)
+```
+
+
+# Filter the Data
+```{r}
+# only females
+survey_data <- survey_data %>%
+  filter(Gender == "Female")
+
+# filter out people who took less than 60 seconds
+survey_data <- survey_data %>%
+  filter(Duration_sec >= 60)
+
+# product check
+survey_data <- survey_data %>%
+  filter(ProductCheck == "Athletic Apparel") 
+
+# brand check... checks if they chose lululemon or old navy (might need to fix this later bc they could 
+# have just guessed) 
+survey_data <- survey_data %>%
+  filter(BrandCheck %in% c("Lululemon", "Old Navy"))
+
+head(survey_data, 10)
+```
+
+
+# Recode the self-esteem Question
+"scored by totaling the individual 4 point items after reverse-scoring the negatively worded items."
+higher score = better self-esteem
+```{r}
+
+# Rename columns for simplicity
+survey_data <- survey_data %>%
+  rename(
+    RSE_1 = `X..ImportId...QID17_1..`,
+    RSE_2 = `X..ImportId...QID17_2..`,
+    RSE_3 = `X..ImportId...QID17_3..`,
+    RSE_4 = `X..ImportId...QID17_4..`,
+    RSE_5 = `X..ImportId...QID17_5..`,
+    RSE_6 = `X..ImportId...QID17_6..`,
+    RSE_7 = `X..ImportId...QID17_7..`,
+    RSE_8 = `X..ImportId...QID17_8..`,
+    RSE_9 = `X..ImportId...QID17_9..`,
+    RSE_10 = `X..ImportId...QID17_10..`
+  )
+
+# get just the number
+survey_data <- survey_data %>%
+  mutate(across(starts_with("RSE_"), ~ as.numeric(str_extract(., "^\\d"))))
+
+# Reverse-scored items (2, 5, 6, 8, 9)
+survey_data <- survey_data %>%
+  mutate(across(c(RSE_2, RSE_5, RSE_6, RSE_8, RSE_9), ~ recode(., `1` = 4, `2` = 3, `3` = 2, `4` = 1)))
+
+head(survey_data)
+
+# Calculate total and average and make them new columns
+survey_data <- survey_data %>%
+  rowwise() %>%
+  mutate(
+    RSE_Total = sum(c_across(starts_with("RSE_")), na.rm = TRUE),
+    RSE_Average = mean(c_across(starts_with("RSE_")), na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+summary(survey_data$RSE_Total)
+```
+
+# Self-esteem
+```{r}
+# total self-esteem scores
+ggplot(survey_data, aes(x = RSE_Total)) +
+  geom_histogram(binwidth = 2, fill = "seagreen", color = "white") +
+  labs(title = "Distribution of Self-Esteem Scores",
+       x = "Total Self-Esteem Score",
+       y = "Count") +
+  theme_minimal()
+
+# average self-esteem scores
+ggplot(survey_data, aes(x = RSE_Average)) +
+  geom_histogram(fill = "seagreen", color = "white") +
+  labs(title = "Distribution of Average Self-Esteem Scores",
+       x = "Average Self-Esteem Score",
+       y = "Count") +
+  theme_minimal()
+```
+
+
+# Overview of Demographics
+```{r}
+# Age
+ggplot(survey_data, aes(x = Age)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Age Group Distribution", x = "Age Group", y = "Count")
+
+# Employment
+ggplot(survey_data, aes(x = Employment)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Employment Group Distribution", x = "Employment Group", y = "Count") +
+  theme(axis.text.x = element_text(angle = 55, hjust = 1))
+
+# Marital Status
+ggplot(survey_data, aes(x = MaritalStatus)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Marital Status Distribution", x = "Marital Status", y = "Count") 
+
+# Income Status
+ggplot(survey_data, aes(x = Income)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Income Status Distribution", x = "Income Status", y = "Count") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+```
+
+
+# Describing the Data 
+```{r}
+# Time to take survey
+ggplot(survey_data, aes(x = Duration_sec)) +
+  geom_histogram(binwidth = 10, fill = "skyblue", color = "black") +
+  labs(title = "Survey Completion Time Distribution",
+       x = "Duration (seconds)", 
+       y = "Number of Participants")
+
+# Uses Social media?
+ggplot(survey_data, aes(x = UsesSocialMedia)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Do they use Social Media?", x = "Use social media?", y = "Count")
+
+# Social Media Platforms
+# Split platforms into separate rows to graph
+platforms_long <- survey_data %>%
+  separate_rows(PlatformsUsed, sep = ",\\s*")  
+
+ggplot(platforms_long, aes(x = PlatformsUsed)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Social Media Platforms Used", x = "Platform", y = "Count") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+# other platforms people use - 
+# X, Snapchat, Reddit, Twitter, YouTube, Truth Social, Bluesky, Tumblr, Nextdoor, Threads, Whatsapp, Discord
+unique(survey_data$OtherPlatforms)
+
+# Hours per day
+ggplot(survey_data, aes(x = HoursPerDay)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Hours Per Day Spent on Social Media", x = "Hours", y = "Count")
+
+# Main purpose in using social media
+ggplot(survey_data, aes(x = MainPurpose)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Main Purpose when Using Social Media", x = "Purpose", y = "Count") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+# other reasons
+unique(survey_data$OtherReasons)
+
+# How Often do they Interact with Influencers
+ggplot(survey_data, aes(x = InteractWithInfluencers)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "How Often do they Interact with Influencers", x = "Frequency", y = "Count")
+
+# Influencers they know
+# Split influencers into separate rows to graph
+influencers_long <- survey_data %>%
+  separate_rows(FamiliarInfluencers, sep = ",\\s*")  
+
+ggplot(influencers_long, aes(x = FamiliarInfluencers)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Which Influencers they Know", x = "Influencer", y = "Count") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+
+```
+
+
+
+
+
+
+
+
+
+
