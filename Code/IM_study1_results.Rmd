@@ -1,0 +1,100 @@
+---
+title: "Influencer Marketing Study 1"
+output: 
+  github_document:
+    toc: true
+date: "2025-03-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+Upload data, select rows and columns
+```{r}
+data <- read_csv("../Downloads/im_study_results.csv")
+
+data <- data[3:365,]
+
+clean_data <- data %>% select(-StartDate, -EndDate, -Status, -Progress, -Finished, -RecordedDate, -RecipientFirstName, -RecipientLastName, -RecipientEmail, -ExternalReference, -DistributionChannel, -UserLanguage, -LocationLatitude, -LocationLongitude)
+```
+
+Remove respondents that are not female, finished too quickly or failed attention checks for brand & product
+```{r}
+clean_data <- clean_data %>% filter(Q22=="Female")
+
+hist(as.numeric(clean_data$`Duration (in seconds)`)/60, main="Duration in Minutes")
+min(as.numeric(clean_data$`Duration (in seconds)`))
+mean(as.numeric(clean_data$`Duration (in seconds)`))
+median(as.numeric(clean_data$`Duration (in seconds)`))
+
+#sort(as.numeric(clean_data$`Duration (in seconds)`))
+
+clean_data <- clean_data %>% mutate(duration=as.numeric(`Duration (in seconds)`)) %>% filter(duration>120)
+
+clean_data <- clean_data %>% filter(Q14=="Athletic Apparel")
+
+unique(clean_data$Q33)
+
+clean_data <- clean_data %>% filter(Q33 %in% c("Lululemon", "Old Navy"))
+
+unique(clean_data$Q42)
+```
+
+# Social Media Usage 
+
+```{r}
+clean_data %>%
+  ggplot(aes(x=Q1, y=..prop.., group=1)) + 
+  geom_bar() + 
+  scale_y_continuous(labels = scales::percent_format()) +  # Convert to percentage format
+  labs(y="", x="", title="Do you use any form of social media?") + theme_minimal()
+
+#other includes reddit, youtube, twitter, tumblr, blue sky, discord, snapchat, and a couple others 
+#unique(clean_data$Q5_6_TEXT)
+
+# Separate multiple selections into individual rows
+social_media_counts <- clean_data %>%
+  separate_rows(Q5, sep = ",") %>%  # Split at commas into separate rows
+  count(Q5) %>%  # Count occurrences of each platform
+  mutate(percent = (n /nrow(clean_data)) * 100)  # Calculate percentage
+
+social_media_colors <- c(
+  "Facebook" = "#1877F2",    # Facebook Blue
+  "Instagram" = "#E4405F",   # Instagram Pink/Red
+  "TikTok" = "#000000",      # TikTok Black
+  "Pinterest" = "#E60023",   # Pinterest Red
+  "Linkedin" = "#0077B5",    # LinkedIn Blue
+  "Twitter" = "#1DA1F2",     # Twitter Blue
+  "Snapchat" = "#FFFC00",    # Snapchat Yellow
+  "YouTube" = "#FF0000"      # YouTube Red
+)
+
+social_media_counts %>% arrange(percent) %>% 
+  ggplot(aes(x=Q5, y=percent, fill=Q5)) + 
+  geom_col(show.legend = FALSE) +  # Use geom_col() since we precomputed counts
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # Format percentages
+  labs(y="Percentage of Respondents", x="", 
+       title="Social Media Usage Distribution") + 
+  theme_minimal() +  # Use geom_col() for precomputed counts
+  scale_fill_manual(values = social_media_colors) 
+
+clean_data %>%
+  ggplot(aes(x=Q6, y=..prop.., group=1)) + 
+  geom_bar() + 
+  scale_y_continuous(labels = scales::percent_format()) +  # Convert to percentage format
+  labs(y="", x="", title="How many hours per day do you spend on social media?") + theme_minimal()
+
+clean_data %>%
+  ggplot(aes(x=Q20, y=..prop.., group=1, fill=Q20)) + 
+  geom_bar() + 
+  scale_y_continuous(labels = scales::percent_format()) +  # Convert to percentage format
+  labs(y="", x="", title="How many hours per day do you spend on social media?") + theme_minimal() + coord_flip()
+```
+
+
+
+
+
+
