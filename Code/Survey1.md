@@ -9,6 +9,9 @@ Influencer Marketing Survey 1
 - [Self-esteem](#self-esteem)
 - [Overview of Demographics](#overview-of-demographics)
 - [Describing the Data](#describing-the-data)
+- [Parasocial Relationships](#parasocial-relationships)
+- [Brand Ratings](#brand-ratings)
+- [T-tests](#t-tests)
 
 ``` r
 library(tidyverse)
@@ -34,219 +37,8 @@ library(dplyr)
 
 ``` r
 survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
-head(survey_data)
+# head(survey_data)
 ```
-
-    ##   X..ImportId...startDate...timeZone...America.Denver..
-    ## 1                                   2025-03-14 14:29:20
-    ## 2                                   2025-03-14 14:39:26
-    ## 3                                   2025-03-14 14:38:22
-    ## 4                                   2025-03-14 14:40:03
-    ## 5                                   2025-03-14 14:40:26
-    ## 6                                   2025-03-14 14:42:05
-    ##   X..ImportId...endDate...timeZone...America.Denver.. X..ImportId...status..
-    ## 1                                 2025-03-14 14:30:32         Survey Preview
-    ## 2                                 2025-03-14 14:42:15             IP Address
-    ## 3                                 2025-03-14 14:42:31             IP Address
-    ## 4                                 2025-03-14 14:43:03             IP Address
-    ## 5                                 2025-03-14 14:43:34             IP Address
-    ## 6                                 2025-03-14 14:45:08             IP Address
-    ##   X..ImportId...ipAddress.. X..ImportId...progress.. X..ImportId...duration..
-    ## 1                                                100                       71
-    ## 2             70.171.95.151                      100                      169
-    ## 3             98.196.247.78                      100                      249
-    ## 4            149.106.50.133                      100                      180
-    ## 5            97.119.155.189                      100                      188
-    ## 6             47.209.14.104                      100                      183
-    ##   X..ImportId...finished..
-    ## 1                     True
-    ## 2                     True
-    ## 3                     True
-    ## 4                     True
-    ## 5                     True
-    ## 6                     True
-    ##   X..ImportId...recordedDate...timeZone...America.Denver..
-    ## 1                                      2025-03-14 14:30:32
-    ## 2                                      2025-03-14 14:42:16
-    ## 3                                      2025-03-14 14:42:32
-    ## 4                                      2025-03-14 14:43:04
-    ## 5                                      2025-03-14 14:43:35
-    ## 6                                      2025-03-14 14:45:09
-    ##   X..ImportId..._recordId.. X..ImportId...recipientLastName..
-    ## 1         R_7ouRxwqsnwBcZlz                                NA
-    ## 2         R_6dd9BuKWbyyUMUo                                NA
-    ## 3         R_13yGgx8oL7XpmWA                                NA
-    ## 4         R_6hEhLNwdVlnzpJa                                NA
-    ## 5         R_34zEuZf8YCbdwHv                                NA
-    ## 6         R_1TfgObMd02FYnOF                                NA
-    ##   X..ImportId...recipientFirstName.. X..ImportId...recipientEmail..
-    ## 1                                 NA                             NA
-    ## 2                                 NA                             NA
-    ## 3                                 NA                             NA
-    ## 4                                 NA                             NA
-    ## 5                                 NA                             NA
-    ## 6                                 NA                             NA
-    ##   X..ImportId...externalDataReference.. X..ImportId...locationLatitude..
-    ## 1                                    NA                          40.2329
-    ## 2                                    NA                          30.0035
-    ## 3                                    NA                          29.7376
-    ## 4                                    NA                          36.4215
-    ## 5                                    NA                          41.2884
-    ## 6                                    NA                          37.6521
-    ##   X..ImportId...locationLongitude.. X..ImportId...distributionChannel..
-    ## 1                         -111.6688                             preview
-    ## 2                          -90.0607                           anonymous
-    ## 3                          -95.5210                           anonymous
-    ## 4                          -84.9384                           anonymous
-    ## 5                          -95.9972                           anonymous
-    ## 6                         -118.9698                           anonymous
-    ##   X..ImportId...userLanguage.. X..ImportId...Q_RecaptchaScore..
-    ## 1                           EN                              1.0
-    ## 2                           EN                              1.0
-    ## 3                           EN                              1.0
-    ## 4                           EN                              0.9
-    ## 5                           EN                              0.9
-    ## 6                           EN                              1.0
-    ##   X..ImportId...QID22.. X..ImportId...QID1..
-    ## 1                Female                   No
-    ## 2                Female                  Yes
-    ## 3                Female                  Yes
-    ## 4                Female                  Yes
-    ## 5                Female                  Yes
-    ## 6                Female                  Yes
-    ##                           X..ImportId...QID5.. X..ImportId...QID5_6_TEXT..
-    ## 1                                                                         
-    ## 2 Instagram,Facebook,TikTok,Pinterest,Linkedin                            
-    ## 3           Instagram,Facebook,TikTok,Linkedin                            
-    ## 4 Instagram,Facebook,TikTok,Pinterest,Linkedin                            
-    ## 5                  Facebook,Pinterest,Linkedin                            
-    ## 6        Instagram,Facebook,Pinterest,Linkedin                            
-    ##   X..ImportId...QID6..  X..ImportId...QID20.. X..ImportId...QID20_5_TEXT..
-    ## 1                                                                         
-    ## 2            1-3 hours Other (please specify)           Marketing for work
-    ## 3             7+ hours          Entertainment                             
-    ## 4             < 1 hour          Entertainment                             
-    ## 5             < 1 hour          Entertainment                             
-    ## 6            1-3 hours Other (please specify)                    Marketing
-    ##   X..ImportId...QID21..              X..ImportId...QID40..
-    ## 1                                                         
-    ## 2             Every day Alix Earle,Aspyn Ovard,Taylor Paul
-    ## 3             Every day                               None
-    ## 4          2-3 per week                               None
-    ## 5                 Never                               None
-    ## 6             Every day             Taylor Paul,Lo Beeston
-    ##   X..ImportId...QID53_FIRST_CLICK.. X..ImportId...QID53_LAST_CLICK..
-    ## 1                                NA                               NA
-    ## 2                                NA                               NA
-    ## 3                                NA                               NA
-    ## 4                             1.918                           33.096
-    ## 5                                NA                               NA
-    ## 6                            14.043                           14.043
-    ##   X..ImportId...QID53_PAGE_SUBMIT.. X..ImportId...QID53_CLICK_COUNT..
-    ## 1                                NA                                NA
-    ## 2                                NA                                NA
-    ## 3                                NA                                NA
-    ## 4                            33.722                                 5
-    ## 5                                NA                                NA
-    ## 6                            31.901                                 1
-    ##   X..ImportId...QID52_FIRST_CLICK.. X..ImportId...QID52_LAST_CLICK..
-    ## 1                             0.000                            0.000
-    ## 2                            25.098                           25.098
-    ## 3                            13.157                           35.076
-    ## 4                                NA                               NA
-    ## 5                             8.063                           34.053
-    ## 6                                NA                               NA
-    ##   X..ImportId...QID52_PAGE_SUBMIT.. X..ImportId...QID52_CLICK_COUNT..
-    ## 1                            30.732                                 0
-    ## 2                            37.853                                 1
-    ## 3                            35.918                                 3
-    ## 4                                NA                                NA
-    ## 5                            35.387                                 8
-    ## 6                                NA                                NA
-    ##   X..ImportId...QID14.. X..ImportId...QID33.. X..ImportId...QID35_1..
-    ## 1          Water bottle             Fabletics                      NA
-    ## 2      Athletic Apparel              Old Navy                       2
-    ## 3      Athletic Apparel              Old Navy                       3
-    ## 4      Athletic Apparel              Old Navy                       2
-    ## 5      Athletic Apparel              Old Navy                       3
-    ## 6      Athletic Apparel             Lululemon                      NA
-    ##   X..ImportId...QID35_2.. X..ImportId...QID35_3.. X..ImportId...QID39_1..
-    ## 1                      NA                      NA                      NA
-    ## 2                       2                       2                      NA
-    ## 3                       3                       3                      NA
-    ## 4                       3                       2                      NA
-    ## 5                       2                       3                      NA
-    ## 6                      NA                      NA                       4
-    ##   X..ImportId...QID39_2.. X..ImportId...QID39_3.. X..ImportId...QID42..
-    ## 1                      NA                      NA            Influencer
-    ## 2                      NA                      NA            Influencer
-    ## 3                      NA                      NA            Influencer
-    ## 4                      NA                      NA            Influencer
-    ## 5                      NA                      NA            Influencer
-    ## 6                       4                       3            Influencer
-    ##   X..ImportId...QID16.. X..ImportId...QID37_1.. X..ImportId...QID37_2..
-    ## 1          Emilie Kiser                Disagree                Disagree
-    ## 2          Emilie Kiser                Disagree                 Neutral
-    ## 3          Emilie Kiser                 Neutral                   Agree
-    ## 4          Emilie Kiser                 Neutral                   Agree
-    ## 5          Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 6          Emilie Kiser       Strongly Disagree                 Neutral
-    ##   X..ImportId...QID37_3.. X..ImportId...QID37_4.. X..ImportId...QID37_5..
-    ## 1                Disagree                Disagree                Disagree
-    ## 2                 Neutral                Disagree       Strongly Disagree
-    ## 3                 Neutral                 Neutral       Strongly Disagree
-    ## 4                 Neutral                 Neutral       Strongly Disagree
-    ## 5       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 6                 Neutral                Disagree       Strongly Disagree
-    ##   X..ImportId...QID37_6.. X..ImportId...QID37_7.. X..ImportId...QID37_8..
-    ## 1                Disagree                Disagree                Disagree
-    ## 2       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 3       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 4       Strongly Disagree                Disagree       Strongly Disagree
-    ## 5       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 6       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ##   X..ImportId...QID17_1.. X..ImportId...QID17_2.. X..ImportId...QID17_3..
-    ## 1               2 (Agree)               2 (Agree)               2 (Agree)
-    ## 2               2 (Agree)      1 (Strongly agree)               2 (Agree)
-    ## 3      1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 4               2 (Agree)   4 (Strongly disagree)               2 (Agree)
-    ## 5      1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 6            3 (Disagree)               2 (Agree)      1 (Strongly agree)
-    ##   X..ImportId...QID17_4.. X..ImportId...QID17_5.. X..ImportId...QID17_6..
-    ## 1               2 (Agree)               2 (Agree)               2 (Agree)
-    ## 2               2 (Agree)      1 (Strongly agree)      1 (Strongly agree)
-    ## 3      1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 4               2 (Agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 5      1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 6               2 (Agree)            3 (Disagree)      1 (Strongly agree)
-    ##   X..ImportId...QID17_7.. X..ImportId...QID17_8.. X..ImportId...QID17_9..
-    ## 1               2 (Agree)               2 (Agree)               2 (Agree)
-    ## 2            3 (Disagree)               2 (Agree)      1 (Strongly agree)
-    ## 3      1 (Strongly agree)      1 (Strongly agree)   4 (Strongly disagree)
-    ## 4               2 (Agree)      1 (Strongly agree)   4 (Strongly disagree)
-    ## 5      1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 6               2 (Agree)               2 (Agree)               2 (Agree)
-    ##   X..ImportId...QID17_10.. X..ImportId...QID7..
-    ## 1                2 (Agree)             Under 18
-    ## 2                2 (Agree)      35-44 years old
-    ## 3       1 (Strongly agree)      35-44 years old
-    ## 4                2 (Agree)      35-44 years old
-    ## 5       1 (Strongly agree)      25-34 years old
-    ## 6                2 (Agree)      25-34 years old
-    ##                 X..ImportId...QID9.. X..ImportId...QID10..
-    ## 1                  Working part-time    Divorced/Separated
-    ## 2                  Working full-time               Married
-    ## 3                  Working full-time               Married
-    ## 4 A homemaker or stay-at-home parent Living with a partner
-    ## 5                  Working full-time    Divorced/Separated
-    ## 6                  Working part-time    Never been married
-    ##   X..ImportId...QID47..
-    ## 1       $75,000-$99,999
-    ## 2      $150,000 or more
-    ## 3       $50,000-$74,999
-    ## 4     Less than $25,000
-    ## 5     Less than $25,000
-    ## 6     Less than $25,000
 
 # Fix Column Names
 
@@ -329,107 +121,8 @@ survey_data <- survey_data %>%
     MaritalStatus = X..ImportId...QID10..,
     Income = X..ImportId...QID47..
   )
-head(survey_data)
+#head(survey_data)
 ```
-
-    ##   Duration_sec          RecordId RecaptchaScore Gender UsesSocialMedia
-    ## 1           71 R_7ouRxwqsnwBcZlz            1.0 Female              No
-    ## 2          169 R_6dd9BuKWbyyUMUo            1.0 Female             Yes
-    ## 3          249 R_13yGgx8oL7XpmWA            1.0 Female             Yes
-    ## 4          180 R_6hEhLNwdVlnzpJa            0.9 Female             Yes
-    ## 5          188 R_34zEuZf8YCbdwHv            0.9 Female             Yes
-    ## 6          183 R_1TfgObMd02FYnOF            1.0 Female             Yes
-    ##                                  PlatformsUsed OtherPlatforms HoursPerDay
-    ## 1                                                                        
-    ## 2 Instagram,Facebook,TikTok,Pinterest,Linkedin                  1-3 hours
-    ## 3           Instagram,Facebook,TikTok,Linkedin                   7+ hours
-    ## 4 Instagram,Facebook,TikTok,Pinterest,Linkedin                   < 1 hour
-    ## 5                  Facebook,Pinterest,Linkedin                   < 1 hour
-    ## 6        Instagram,Facebook,Pinterest,Linkedin                  1-3 hours
-    ##              MainPurpose       OtherReasons InteractWithInfluencers
-    ## 1                                                                  
-    ## 2 Other (please specify) Marketing for work               Every day
-    ## 3          Entertainment                                  Every day
-    ## 4          Entertainment                               2-3 per week
-    ## 5          Entertainment                                      Never
-    ## 6 Other (please specify)          Marketing               Every day
-    ##                  FamiliarInfluencers     ProductCheck BrandCheck
-    ## 1                                        Water bottle  Fabletics
-    ## 2 Alix Earle,Aspyn Ovard,Taylor Paul Athletic Apparel   Old Navy
-    ## 3                               None Athletic Apparel   Old Navy
-    ## 4                               None Athletic Apparel   Old Navy
-    ## 5                               None Athletic Apparel   Old Navy
-    ## 6             Taylor Paul,Lo Beeston Athletic Apparel  Lululemon
-    ##   X..ImportId...QID35_1.. X..ImportId...QID35_2.. X..ImportId...QID35_3..
-    ## 1                      NA                      NA                      NA
-    ## 2                       2                       2                       2
-    ## 3                       3                       3                       3
-    ## 4                       2                       3                       2
-    ## 5                       3                       2                       3
-    ## 6                      NA                      NA                      NA
-    ##   X..ImportId...QID39_1.. X..ImportId...QID39_2.. X..ImportId...QID39_3..
-    ## 1                      NA                      NA                      NA
-    ## 2                      NA                      NA                      NA
-    ## 3                      NA                      NA                      NA
-    ## 4                      NA                      NA                      NA
-    ## 5                      NA                      NA                      NA
-    ## 6                       4                       4                       3
-    ##    WhoPosted   Influencer X..ImportId...QID37_1.. X..ImportId...QID37_2..
-    ## 1 Influencer Emilie Kiser                Disagree                Disagree
-    ## 2 Influencer Emilie Kiser                Disagree                 Neutral
-    ## 3 Influencer Emilie Kiser                 Neutral                   Agree
-    ## 4 Influencer Emilie Kiser                 Neutral                   Agree
-    ## 5 Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 6 Influencer Emilie Kiser       Strongly Disagree                 Neutral
-    ##   X..ImportId...QID37_3.. X..ImportId...QID37_4.. X..ImportId...QID37_5..
-    ## 1                Disagree                Disagree                Disagree
-    ## 2                 Neutral                Disagree       Strongly Disagree
-    ## 3                 Neutral                 Neutral       Strongly Disagree
-    ## 4                 Neutral                 Neutral       Strongly Disagree
-    ## 5       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 6                 Neutral                Disagree       Strongly Disagree
-    ##   X..ImportId...QID37_6.. X..ImportId...QID37_7.. X..ImportId...QID37_8..
-    ## 1                Disagree                Disagree                Disagree
-    ## 2       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 3       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 4       Strongly Disagree                Disagree       Strongly Disagree
-    ## 5       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 6       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ##   X..ImportId...QID17_1.. X..ImportId...QID17_2.. X..ImportId...QID17_3..
-    ## 1               2 (Agree)               2 (Agree)               2 (Agree)
-    ## 2               2 (Agree)      1 (Strongly agree)               2 (Agree)
-    ## 3      1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 4               2 (Agree)   4 (Strongly disagree)               2 (Agree)
-    ## 5      1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 6            3 (Disagree)               2 (Agree)      1 (Strongly agree)
-    ##   X..ImportId...QID17_4.. X..ImportId...QID17_5.. X..ImportId...QID17_6..
-    ## 1               2 (Agree)               2 (Agree)               2 (Agree)
-    ## 2               2 (Agree)      1 (Strongly agree)      1 (Strongly agree)
-    ## 3      1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 4               2 (Agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 5      1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 6               2 (Agree)            3 (Disagree)      1 (Strongly agree)
-    ##   X..ImportId...QID17_7.. X..ImportId...QID17_8.. X..ImportId...QID17_9..
-    ## 1               2 (Agree)               2 (Agree)               2 (Agree)
-    ## 2            3 (Disagree)               2 (Agree)      1 (Strongly agree)
-    ## 3      1 (Strongly agree)      1 (Strongly agree)   4 (Strongly disagree)
-    ## 4               2 (Agree)      1 (Strongly agree)   4 (Strongly disagree)
-    ## 5      1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 6               2 (Agree)               2 (Agree)               2 (Agree)
-    ##   X..ImportId...QID17_10..             Age                         Employment
-    ## 1                2 (Agree)        Under 18                  Working part-time
-    ## 2                2 (Agree) 35-44 years old                  Working full-time
-    ## 3       1 (Strongly agree) 35-44 years old                  Working full-time
-    ## 4                2 (Agree) 35-44 years old A homemaker or stay-at-home parent
-    ## 5       1 (Strongly agree) 25-34 years old                  Working full-time
-    ## 6                2 (Agree) 25-34 years old                  Working part-time
-    ##           MaritalStatus            Income
-    ## 1    Divorced/Separated   $75,000-$99,999
-    ## 2               Married  $150,000 or more
-    ## 3               Married   $50,000-$74,999
-    ## 4 Living with a partner Less than $25,000
-    ## 5    Divorced/Separated Less than $25,000
-    ## 6    Never been married Less than $25,000
 
 # Filter the Data
 
@@ -451,174 +144,8 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   filter(BrandCheck %in% c("Lululemon", "Old Navy"))
 
-head(survey_data, 10)
+#head(survey_data, 10)
 ```
-
-    ##    Duration_sec          RecordId RecaptchaScore Gender UsesSocialMedia
-    ## 1           169 R_6dd9BuKWbyyUMUo            1.0 Female             Yes
-    ## 2           249 R_13yGgx8oL7XpmWA            1.0 Female             Yes
-    ## 3           180 R_6hEhLNwdVlnzpJa            0.9 Female             Yes
-    ## 4           188 R_34zEuZf8YCbdwHv            0.9 Female             Yes
-    ## 5           183 R_1TfgObMd02FYnOF            1.0 Female             Yes
-    ## 6           127 R_3VQGnXqeZazZQY3            1.0 Female             Yes
-    ## 7           126 R_5oGVjARBB61jnSu            1.0 Female             Yes
-    ## 8           123 R_7tZRK1rKhjm88il            1.0 Female             Yes
-    ## 9           150 R_3qP5cP6q0RWnF2P            1.0 Female             Yes
-    ## 10          262 R_5sSyWbwgKcOM1BG            1.0 Female             Yes
-    ##                                                          PlatformsUsed
-    ## 1                         Instagram,Facebook,TikTok,Pinterest,Linkedin
-    ## 2                                   Instagram,Facebook,TikTok,Linkedin
-    ## 3                         Instagram,Facebook,TikTok,Pinterest,Linkedin
-    ## 4                                          Facebook,Pinterest,Linkedin
-    ## 5                                Instagram,Facebook,Pinterest,Linkedin
-    ## 6                   Instagram,Facebook,Linkedin,Other (please specify)
-    ## 7                                            Instagram,Facebook,TikTok
-    ## 8  Instagram,Facebook,TikTok,Pinterest,Linkedin,Other (please specify)
-    ## 9                         Instagram,Facebook,TikTok,Pinterest,Linkedin
-    ## 10                    Instagram,Facebook,TikTok,Other (please specify)
-    ##       OtherPlatforms HoursPerDay                    MainPurpose
-    ## 1                      1-3 hours         Other (please specify)
-    ## 2                       7+ hours                  Entertainment
-    ## 3                       < 1 hour                  Entertainment
-    ## 4                       < 1 hour                  Entertainment
-    ## 5                      1-3 hours         Other (please specify)
-    ## 6  Reddit, Goodreads   1-3 hours                           News
-    ## 7                      1-3 hours Staying connected with friends
-    ## 8                  X    < 1 hour                  Entertainment
-    ## 9                      1-3 hours                  Entertainment
-    ## 10          Snapchat   1-3 hours Staying connected with friends
-    ##          OtherReasons InteractWithInfluencers
-    ## 1  Marketing for work               Every day
-    ## 2                                   Every day
-    ## 3                                2-3 per week
-    ## 4                                       Never
-    ## 5           Marketing               Every day
-    ## 6                                   Every day
-    ## 7                                   Every day
-    ## 8                                   Every day
-    ## 9                                Once a month
-    ## 10                               2-3 per week
-    ##                        FamiliarInfluencers     ProductCheck BrandCheck
-    ## 1       Alix Earle,Aspyn Ovard,Taylor Paul Athletic Apparel   Old Navy
-    ## 2                                     None Athletic Apparel   Old Navy
-    ## 3                                     None Athletic Apparel   Old Navy
-    ## 4                                     None Athletic Apparel   Old Navy
-    ## 5                   Taylor Paul,Lo Beeston Athletic Apparel  Lululemon
-    ## 6                                     None Athletic Apparel   Old Navy
-    ## 7                                     None Athletic Apparel   Old Navy
-    ## 8  Emilie Kiser,Allison Kuch,Sabrina Blair Athletic Apparel  Lululemon
-    ## 9                                     None Athletic Apparel  Lululemon
-    ## 10                                    None Athletic Apparel   Old Navy
-    ##    X..ImportId...QID35_1.. X..ImportId...QID35_2.. X..ImportId...QID35_3..
-    ## 1                        2                       2                       2
-    ## 2                        3                       3                       3
-    ## 3                        2                       3                       2
-    ## 4                        3                       2                       3
-    ## 5                       NA                      NA                      NA
-    ## 6                        2                       2                       1
-    ## 7                        2                       2                       2
-    ## 8                       NA                      NA                      NA
-    ## 9                       NA                      NA                      NA
-    ## 10                       3                       2                       2
-    ##    X..ImportId...QID39_1.. X..ImportId...QID39_2.. X..ImportId...QID39_3..
-    ## 1                       NA                      NA                      NA
-    ## 2                       NA                      NA                      NA
-    ## 3                       NA                      NA                      NA
-    ## 4                       NA                      NA                      NA
-    ## 5                        4                       4                       3
-    ## 6                       NA                      NA                      NA
-    ## 7                       NA                      NA                      NA
-    ## 8                        3                       3                       3
-    ## 9                        4                       4                       4
-    ## 10                      NA                      NA                      NA
-    ##     WhoPosted   Influencer X..ImportId...QID37_1.. X..ImportId...QID37_2..
-    ## 1  Influencer Emilie Kiser                Disagree                 Neutral
-    ## 2  Influencer Emilie Kiser                 Neutral                   Agree
-    ## 3  Influencer Emilie Kiser                 Neutral                   Agree
-    ## 4  Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 5  Influencer Emilie Kiser       Strongly Disagree                 Neutral
-    ## 6  Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 7  Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 8  Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 9  Influencer Emilie Kiser                Disagree                 Neutral
-    ## 10 Influencer Emilie Kiser                 Neutral                   Agree
-    ##    X..ImportId...QID37_3.. X..ImportId...QID37_4.. X..ImportId...QID37_5..
-    ## 1                  Neutral                Disagree       Strongly Disagree
-    ## 2                  Neutral                 Neutral       Strongly Disagree
-    ## 3                  Neutral                 Neutral       Strongly Disagree
-    ## 4        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 5                  Neutral                Disagree       Strongly Disagree
-    ## 6        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 7        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 8        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 9                  Neutral                 Neutral                 Neutral
-    ## 10                 Neutral                 Neutral                 Neutral
-    ##    X..ImportId...QID37_6.. X..ImportId...QID37_7.. X..ImportId...QID37_8..
-    ## 1        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 2        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 3        Strongly Disagree                Disagree       Strongly Disagree
-    ## 4        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 5        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 6        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 7        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 8        Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 9                  Neutral                 Neutral                 Neutral
-    ## 10       Strongly Disagree                 Neutral       Strongly Disagree
-    ##    X..ImportId...QID17_1.. X..ImportId...QID17_2.. X..ImportId...QID17_3..
-    ## 1                2 (Agree)      1 (Strongly agree)               2 (Agree)
-    ## 2       1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 3                2 (Agree)   4 (Strongly disagree)               2 (Agree)
-    ## 4       1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 5             3 (Disagree)               2 (Agree)      1 (Strongly agree)
-    ## 6       1 (Strongly agree)               2 (Agree)               2 (Agree)
-    ## 7                2 (Agree)            3 (Disagree)               2 (Agree)
-    ## 8       1 (Strongly agree)   4 (Strongly disagree)      1 (Strongly agree)
-    ## 9                2 (Agree)            3 (Disagree)               2 (Agree)
-    ## 10               2 (Agree)            3 (Disagree)      1 (Strongly agree)
-    ##    X..ImportId...QID17_4.. X..ImportId...QID17_5.. X..ImportId...QID17_6..
-    ## 1                2 (Agree)      1 (Strongly agree)      1 (Strongly agree)
-    ## 2       1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 3                2 (Agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 4       1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 5                2 (Agree)            3 (Disagree)      1 (Strongly agree)
-    ## 6             3 (Disagree)            3 (Disagree)               2 (Agree)
-    ## 7                2 (Agree)            3 (Disagree)               2 (Agree)
-    ## 8       1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 9                2 (Agree)            3 (Disagree)            3 (Disagree)
-    ## 10      1 (Strongly agree)            3 (Disagree)               2 (Agree)
-    ##    X..ImportId...QID17_7.. X..ImportId...QID17_8.. X..ImportId...QID17_9..
-    ## 1             3 (Disagree)               2 (Agree)      1 (Strongly agree)
-    ## 2       1 (Strongly agree)      1 (Strongly agree)   4 (Strongly disagree)
-    ## 3                2 (Agree)      1 (Strongly agree)   4 (Strongly disagree)
-    ## 4       1 (Strongly agree)   4 (Strongly disagree)   4 (Strongly disagree)
-    ## 5                2 (Agree)               2 (Agree)               2 (Agree)
-    ## 6                2 (Agree)               2 (Agree)            3 (Disagree)
-    ## 7                2 (Agree)            3 (Disagree)            3 (Disagree)
-    ## 8       1 (Strongly agree)               2 (Agree)   4 (Strongly disagree)
-    ## 9                2 (Agree)            3 (Disagree)            3 (Disagree)
-    ## 10      1 (Strongly agree)               2 (Agree)            3 (Disagree)
-    ##    X..ImportId...QID17_10..             Age                         Employment
-    ## 1                 2 (Agree) 35-44 years old                  Working full-time
-    ## 2        1 (Strongly agree) 35-44 years old                  Working full-time
-    ## 3                 2 (Agree) 35-44 years old A homemaker or stay-at-home parent
-    ## 4        1 (Strongly agree) 25-34 years old                  Working full-time
-    ## 5                 2 (Agree) 25-34 years old                  Working part-time
-    ## 6                 2 (Agree) 35-44 years old                  Working full-time
-    ## 7                 2 (Agree) 55-64 years old                  Working full-time
-    ## 8        1 (Strongly agree) 25-34 years old                  Working full-time
-    ## 9                 2 (Agree) 35-44 years old                  Working part-time
-    ## 10                2 (Agree) 45-54 years old A homemaker or stay-at-home parent
-    ##            MaritalStatus            Income
-    ## 1                Married  $150,000 or more
-    ## 2                Married   $50,000-$74,999
-    ## 3  Living with a partner Less than $25,000
-    ## 4     Divorced/Separated Less than $25,000
-    ## 5     Never been married Less than $25,000
-    ## 6                Married  $150,000 or more
-    ## 7     Divorced/Separated  $150,000 or more
-    ## 8                Married  $150,000 or more
-    ## 9                Married   $25,000-$49,999
-    ## 10               Married   $50,000-$74,999
 
 # Recode the self-esteem Question
 
@@ -626,7 +153,7 @@ head(survey_data, 10)
 the negatively worded items.” higher score = better self-esteem
 
 ``` r
-# Rename columns for simplicity
+# Rename columns
 survey_data <- survey_data %>%
   rename(
     RSE_1 = `X..ImportId...QID17_1..`,
@@ -645,92 +172,12 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   mutate(across(starts_with("RSE_"), ~ as.numeric(str_extract(., "^\\d"))))
 
-# Reverse-scored items (2, 5, 6, 8, 9)
+# Reverse-scored items (2, 5, 6, 8, 9) -i think those are backwards!! reorder
 survey_data <- survey_data %>%
-  mutate(across(c(RSE_2, RSE_5, RSE_6, RSE_8, RSE_9), ~ recode(., `1` = 4, `2` = 3, `3` = 2, `4` = 1)))
+  mutate(across(c(RSE_1, RSE_3, RSE_4, RSE_7, RSE_10), ~ recode(., `1` = 4, `2` = 3, `3` = 2, `4` = 1)))
 
-head(survey_data)
-```
+#head(survey_data)
 
-    ##   Duration_sec          RecordId RecaptchaScore Gender UsesSocialMedia
-    ## 1          169 R_6dd9BuKWbyyUMUo            1.0 Female             Yes
-    ## 2          249 R_13yGgx8oL7XpmWA            1.0 Female             Yes
-    ## 3          180 R_6hEhLNwdVlnzpJa            0.9 Female             Yes
-    ## 4          188 R_34zEuZf8YCbdwHv            0.9 Female             Yes
-    ## 5          183 R_1TfgObMd02FYnOF            1.0 Female             Yes
-    ## 6          127 R_3VQGnXqeZazZQY3            1.0 Female             Yes
-    ##                                        PlatformsUsed    OtherPlatforms
-    ## 1       Instagram,Facebook,TikTok,Pinterest,Linkedin                  
-    ## 2                 Instagram,Facebook,TikTok,Linkedin                  
-    ## 3       Instagram,Facebook,TikTok,Pinterest,Linkedin                  
-    ## 4                        Facebook,Pinterest,Linkedin                  
-    ## 5              Instagram,Facebook,Pinterest,Linkedin                  
-    ## 6 Instagram,Facebook,Linkedin,Other (please specify) Reddit, Goodreads
-    ##   HoursPerDay            MainPurpose       OtherReasons InteractWithInfluencers
-    ## 1   1-3 hours Other (please specify) Marketing for work               Every day
-    ## 2    7+ hours          Entertainment                                  Every day
-    ## 3    < 1 hour          Entertainment                               2-3 per week
-    ## 4    < 1 hour          Entertainment                                      Never
-    ## 5   1-3 hours Other (please specify)          Marketing               Every day
-    ## 6   1-3 hours                   News                                  Every day
-    ##                  FamiliarInfluencers     ProductCheck BrandCheck
-    ## 1 Alix Earle,Aspyn Ovard,Taylor Paul Athletic Apparel   Old Navy
-    ## 2                               None Athletic Apparel   Old Navy
-    ## 3                               None Athletic Apparel   Old Navy
-    ## 4                               None Athletic Apparel   Old Navy
-    ## 5             Taylor Paul,Lo Beeston Athletic Apparel  Lululemon
-    ## 6                               None Athletic Apparel   Old Navy
-    ##   X..ImportId...QID35_1.. X..ImportId...QID35_2.. X..ImportId...QID35_3..
-    ## 1                       2                       2                       2
-    ## 2                       3                       3                       3
-    ## 3                       2                       3                       2
-    ## 4                       3                       2                       3
-    ## 5                      NA                      NA                      NA
-    ## 6                       2                       2                       1
-    ##   X..ImportId...QID39_1.. X..ImportId...QID39_2.. X..ImportId...QID39_3..
-    ## 1                      NA                      NA                      NA
-    ## 2                      NA                      NA                      NA
-    ## 3                      NA                      NA                      NA
-    ## 4                      NA                      NA                      NA
-    ## 5                       4                       4                       3
-    ## 6                      NA                      NA                      NA
-    ##    WhoPosted   Influencer X..ImportId...QID37_1.. X..ImportId...QID37_2..
-    ## 1 Influencer Emilie Kiser                Disagree                 Neutral
-    ## 2 Influencer Emilie Kiser                 Neutral                   Agree
-    ## 3 Influencer Emilie Kiser                 Neutral                   Agree
-    ## 4 Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ## 5 Influencer Emilie Kiser       Strongly Disagree                 Neutral
-    ## 6 Influencer Emilie Kiser       Strongly Disagree       Strongly Disagree
-    ##   X..ImportId...QID37_3.. X..ImportId...QID37_4.. X..ImportId...QID37_5..
-    ## 1                 Neutral                Disagree       Strongly Disagree
-    ## 2                 Neutral                 Neutral       Strongly Disagree
-    ## 3                 Neutral                 Neutral       Strongly Disagree
-    ## 4       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ## 5                 Neutral                Disagree       Strongly Disagree
-    ## 6       Strongly Disagree       Strongly Disagree       Strongly Disagree
-    ##   X..ImportId...QID37_6.. X..ImportId...QID37_7.. X..ImportId...QID37_8.. RSE_1
-    ## 1       Strongly Disagree       Strongly Disagree       Strongly Disagree     2
-    ## 2       Strongly Disagree       Strongly Disagree       Strongly Disagree     1
-    ## 3       Strongly Disagree                Disagree       Strongly Disagree     2
-    ## 4       Strongly Disagree       Strongly Disagree       Strongly Disagree     1
-    ## 5       Strongly Disagree       Strongly Disagree       Strongly Disagree     3
-    ## 6       Strongly Disagree       Strongly Disagree       Strongly Disagree     1
-    ##   RSE_2 RSE_3 RSE_4 RSE_5 RSE_6 RSE_7 RSE_8 RSE_9 RSE_10             Age
-    ## 1     4     2     2     4     4     3     3     4      2 35-44 years old
-    ## 2     1     1     1     1     1     1     4     1      1 35-44 years old
-    ## 3     1     2     2     1     1     2     4     1      2 35-44 years old
-    ## 4     1     1     1     1     1     1     1     1      1 25-34 years old
-    ## 5     3     1     2     2     4     2     3     3      2 25-34 years old
-    ## 6     3     2     3     2     3     2     3     2      2 35-44 years old
-    ##                           Employment         MaritalStatus            Income
-    ## 1                  Working full-time               Married  $150,000 or more
-    ## 2                  Working full-time               Married   $50,000-$74,999
-    ## 3 A homemaker or stay-at-home parent Living with a partner Less than $25,000
-    ## 4                  Working full-time    Divorced/Separated Less than $25,000
-    ## 5                  Working part-time    Never been married Less than $25,000
-    ## 6                  Working full-time               Married  $150,000 or more
-
-``` r
 # Calculate total and average and make them new columns
 survey_data <- survey_data %>%
   rowwise() %>%
@@ -744,7 +191,7 @@ summary(survey_data$RSE_Total)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##    10.0    15.0    20.0    20.4    24.0    40.0
+    ##    10.0    26.0    30.0    29.6    35.0    40.0
 
 # Self-esteem
 
@@ -967,3 +414,280 @@ ggplot(influencers_long, aes(x = FamiliarInfluencers)) +
 ```
 
 ![](Survey1_files/figure-gfm/unnamed-chunk-8-7.png)<!-- -->
+
+# Parasocial Relationships
+
+``` r
+# Rename columns
+survey_data <- survey_data %>%
+  rename(
+    PSR_1 = `X..ImportId...QID37_1..`,
+    PSR_2 = `X..ImportId...QID37_2..`,
+    PSR_3 = `X..ImportId...QID37_3..`,
+    PSR_4 = `X..ImportId...QID37_4..`,
+    PSR_5 = `X..ImportId...QID37_5..`,
+    PSR_6 = `X..ImportId...QID37_6..`,
+    PSR_7 = `X..ImportId...QID37_7..`,
+    PSR_8 = `X..ImportId...QID37_8..`,
+  )
+
+
+survey_data <- survey_data %>%
+  mutate(across(starts_with("PSR"),  
+                ~ case_when(
+                  . == "Strongly Disagree" ~ 1,
+                  . == "Disagree" ~ 2,
+                  . == "Neutral" ~ 3,
+                  . == "Agree" ~ 4,
+                  . == "Strongly Agree" ~ 5
+                )))
+
+# Calculate total and average and make them new columns
+survey_data <- survey_data %>%
+  rowwise() %>%
+  mutate(
+    PSR_Total = sum(c_across(starts_with("PSR_")), na.rm = TRUE),
+    PSR_Average = mean(c_across(starts_with("PSR_")), na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+summary(survey_data$PSR_Total)
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##    8.00   11.00   15.00   15.78   18.00   40.00
+
+``` r
+summary(survey_data$PSR_Average)
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   1.778   2.444   3.333   3.507   4.000   8.889
+
+``` r
+# total PSR
+ggplot(survey_data, aes(x = PSR_Total)) +
+  geom_histogram(binwidth = 2, fill = "lightblue", color = "white") +
+  labs(title = "Distribution of PSR Scores",
+       x = "Total PSR Score",
+       y = "Count") +
+  theme_minimal()
+```
+
+![](Survey1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+# average PSR
+ggplot(survey_data, aes(x = PSR_Average)) +
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(title = "Distribution of Average PSR Scores",
+       x = "Average PSR Score",
+       y = "Count") +
+  theme_minimal()
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](Survey1_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+
+# Brand Ratings
+
+Q35(Old Navy) & Q39(Lululemon)
+
+``` r
+# rename
+brand_ratings <- survey_data %>%
+  rename(
+    Q35_1 = `X..ImportId...QID35_1..`,
+    Q35_2 = `X..ImportId...QID35_2..`,
+    Q35_3 = `X..ImportId...QID35_3..`,
+    Q39_1 = `X..ImportId...QID39_1..`,
+    Q39_2 = `X..ImportId...QID39_2..`,
+    Q39_3 = `X..ImportId...QID39_3..`,
+  )
+
+# total and average brand ratings for Q35
+brand_ratings <- brand_ratings %>%
+  rowwise() %>%
+  mutate(
+    Q35_Total = sum(c_across(starts_with("Q35_"))),
+    Q35_Average = mean(c_across(starts_with("Q35_")))
+  ) %>%
+  ungroup()
+
+summary(brand_ratings$Q35_Total)
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    ##   3.000   4.000   6.000   5.809   7.000  12.000     164
+
+``` r
+# graph Q35 total
+ggplot(brand_ratings, aes(x = Q35_Total)) +
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(title = "Brand Rating Scores for Old Navy",
+       x = "Total Score",
+       y = "Count") +
+  theme_minimal()
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 164 rows containing non-finite outside the scale range
+    ## (`stat_bin()`).
+
+![](Survey1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+# total and average brand ratings for Q39
+brand_ratings <- brand_ratings %>%
+  rowwise() %>%
+  mutate(
+    Q39_Total = sum(c_across(starts_with("Q39_"))),
+    Q39_Average = mean(c_across(starts_with("Q39_")))
+  ) %>%
+  ungroup()
+
+#head(brand_ratings, 10)
+
+# graph Q39
+ggplot(brand_ratings, aes(x = Q39_Total)) +
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(title = "Brand Rating Scores for Lululemon",
+       x = "Total Score",
+       y = "Count") +
+  theme_minimal()
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+    ## Warning: Removed 157 rows containing non-finite outside the scale range
+    ## (`stat_bin()`).
+
+![](Survey1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+
+# T-tests
+
+``` r
+# Self-esteem and groups: Lululemon & Old Navy
+t_test_result_RSE <- t.test(RSE_Total ~ BrandCheck, data = survey_data)
+print(t_test_result_RSE)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  RSE_Total by BrandCheck
+    ## t = 1.2715, df = 317.96, p-value = 0.2045
+    ## alternative hypothesis: true difference in means between group Lululemon and group Old Navy is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.5213044  2.4261514
+    ## sample estimates:
+    ## mean in group Lululemon  mean in group Old Navy 
+    ##                30.06707                29.11465
+
+``` r
+# Parasocial relationships and groups: Lululemon & Old Navy
+t_test_result_PSR <- t.test(PSR_Total ~ BrandCheck, data = survey_data)
+print(t_test_result_PSR)
+```
+
+    ## 
+    ##  Welch Two Sample t-test
+    ## 
+    ## data:  PSR_Total by BrandCheck
+    ## t = 1.0554, df = 312.36, p-value = 0.2921
+    ## alternative hypothesis: true difference in means between group Lululemon and group Old Navy is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.6655247  2.2055279
+    ## sample estimates:
+    ## mean in group Lululemon  mean in group Old Navy 
+    ##                16.15854                15.38854
+
+``` r
+# Interested to see if self esteem was effected by hours per day spent on social media
+t_test_result_hours <- aov(RSE_Total ~ HoursPerDay, data = survey_data)
+summary(t_test_result_hours)
+```
+
+    ##              Df Sum Sq Mean Sq F value Pr(>F)
+    ## HoursPerDay   4    128   32.09   0.709  0.586
+    ## Residuals   316  14293   45.23
+
+``` r
+# parasocial relationships and hours per day is significant! 
+hours_per_day_test_PSR <- aov(PSR_Total ~ HoursPerDay, data = survey_data)
+summary(hours_per_day_test_PSR)
+```
+
+    ##              Df Sum Sq Mean Sq F value  Pr(>F)   
+    ## HoursPerDay   4    616  154.12   3.699 0.00584 **
+    ## Residuals   316  13164   41.66                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+# main purpose is also significant with PSR, not with RSE
+main_purpose_test_PSR <- aov(PSR_Total ~ MainPurpose, data = survey_data)
+summary(main_purpose_test_PSR)
+```
+
+    ##              Df Sum Sq Mean Sq F value  Pr(>F)   
+    ## MainPurpose   5    724  144.74   3.492 0.00436 **
+    ## Residuals   315  13057   41.45                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+main_purpose_test_RSE <- aov(RSE_Total ~ MainPurpose, data = survey_data)
+summary(main_purpose_test_RSE)
+```
+
+    ##              Df Sum Sq Mean Sq F value Pr(>F)
+    ## MainPurpose   5    293   58.51   1.304  0.262
+    ## Residuals   315  14128   44.85
+
+``` r
+# interacting with influencers is significant on PSR, not with RSE
+Interaction_with_influencers_test_PSR <- aov(PSR_Total ~ InteractWithInfluencers, data = survey_data)
+summary(Interaction_with_influencers_test_PSR)
+```
+
+    ##                          Df Sum Sq Mean Sq F value   Pr(>F)    
+    ## InteractWithInfluencers   4   1384   345.9   8.817 9.25e-07 ***
+    ## Residuals               316  12397    39.2                     
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+Interaction_with_influencers_test_RSE <- aov(RSE_Total ~ InteractWithInfluencers, data = survey_data)
+summary(Interaction_with_influencers_test_RSE)
+```
+
+    ##                          Df Sum Sq Mean Sq F value Pr(>F)
+    ## InteractWithInfluencers   4    107   26.78   0.591  0.669
+    ## Residuals               316  14314   45.30
+
+``` r
+# Income significant with RSE
+income_test <- aov(RSE_Total ~ Income, data = survey_data)
+summary(income_test)
+```
+
+    ##              Df Sum Sq Mean Sq F value Pr(>F)  
+    ## Income        6    579   96.57   2.191 0.0437 *
+    ## Residuals   314  13842   44.08                 
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+# Marital status significant with RSE
+marital_test <- aov(RSE_Total ~ MaritalStatus, data = survey_data)
+summary(marital_test)
+```
+
+    ##                Df Sum Sq Mean Sq F value  Pr(>F)   
+    ## MaritalStatus   4    748  187.11   4.325 0.00203 **
+    ## Residuals     316  13673   43.27                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

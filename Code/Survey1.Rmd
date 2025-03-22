@@ -17,7 +17,7 @@ library(dplyr)
 # Read in Data
 ```{r}
 survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
-head(survey_data)
+# head(survey_data)
 ```
 
 # Fix Column Names
@@ -75,7 +75,7 @@ survey_data <- survey_data %>%
     MaritalStatus = X..ImportId...QID10..,
     Income = X..ImportId...QID47..
   )
-head(survey_data)
+#head(survey_data)
 ```
 
 
@@ -98,7 +98,7 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   filter(BrandCheck %in% c("Lululemon", "Old Navy"))
 
-head(survey_data, 10)
+#head(survey_data, 10)
 ```
 
 
@@ -107,7 +107,7 @@ head(survey_data, 10)
 higher score = better self-esteem
 ```{r}
 
-# Rename columns for simplicity
+# Rename columns
 survey_data <- survey_data %>%
   rename(
     RSE_1 = `X..ImportId...QID17_1..`,
@@ -126,11 +126,11 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   mutate(across(starts_with("RSE_"), ~ as.numeric(str_extract(., "^\\d"))))
 
-# Reverse-scored items (2, 5, 6, 8, 9)
+# Reverse-scored items (2, 5, 6, 8, 9) -i think those are backwards!! reorder
 survey_data <- survey_data %>%
-  mutate(across(c(RSE_2, RSE_5, RSE_6, RSE_8, RSE_9), ~ recode(., `1` = 4, `2` = 3, `3` = 2, `4` = 1)))
+  mutate(across(c(RSE_1, RSE_3, RSE_4, RSE_7, RSE_10), ~ recode(., `1` = 4, `2` = 3, `3` = 2, `4` = 1)))
 
-head(survey_data)
+#head(survey_data)
 
 # Calculate total and average and make them new columns
 survey_data <- survey_data %>%
@@ -247,9 +247,161 @@ ggplot(influencers_long, aes(x = FamiliarInfluencers)) +
 
 ```
 
+# Parasocial Relationships
+```{r}
+# Rename columns
+survey_data <- survey_data %>%
+  rename(
+    PSR_1 = `X..ImportId...QID37_1..`,
+    PSR_2 = `X..ImportId...QID37_2..`,
+    PSR_3 = `X..ImportId...QID37_3..`,
+    PSR_4 = `X..ImportId...QID37_4..`,
+    PSR_5 = `X..ImportId...QID37_5..`,
+    PSR_6 = `X..ImportId...QID37_6..`,
+    PSR_7 = `X..ImportId...QID37_7..`,
+    PSR_8 = `X..ImportId...QID37_8..`,
+  )
+
+
+survey_data <- survey_data %>%
+  mutate(across(starts_with("PSR"),  
+                ~ case_when(
+                  . == "Strongly Disagree" ~ 1,
+                  . == "Disagree" ~ 2,
+                  . == "Neutral" ~ 3,
+                  . == "Agree" ~ 4,
+                  . == "Strongly Agree" ~ 5
+                )))
+
+# Calculate total and average and make them new columns
+survey_data <- survey_data %>%
+  rowwise() %>%
+  mutate(
+    PSR_Total = sum(c_across(starts_with("PSR_")), na.rm = TRUE),
+    PSR_Average = mean(c_across(starts_with("PSR_")), na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+summary(survey_data$PSR_Total)
+summary(survey_data$PSR_Average)
+
+
+# total PSR
+ggplot(survey_data, aes(x = PSR_Total)) +
+  geom_histogram(binwidth = 2, fill = "lightblue", color = "white") +
+  labs(title = "Distribution of PSR Scores",
+       x = "Total PSR Score",
+       y = "Count") +
+  theme_minimal()
+
+# average PSR
+ggplot(survey_data, aes(x = PSR_Average)) +
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(title = "Distribution of Average PSR Scores",
+       x = "Average PSR Score",
+       y = "Count") +
+  theme_minimal()
+```
 
 
 
+# Brand Ratings 
+Q35(Old Navy) & Q39(Lululemon) 
+```{r}
+# rename
+brand_ratings <- survey_data %>%
+  rename(
+    Q35_1 = `X..ImportId...QID35_1..`,
+    Q35_2 = `X..ImportId...QID35_2..`,
+    Q35_3 = `X..ImportId...QID35_3..`,
+    Q39_1 = `X..ImportId...QID39_1..`,
+    Q39_2 = `X..ImportId...QID39_2..`,
+    Q39_3 = `X..ImportId...QID39_3..`,
+  )
+
+# total and average brand ratings for Q35
+brand_ratings <- brand_ratings %>%
+  rowwise() %>%
+  mutate(
+    Q35_Total = sum(c_across(starts_with("Q35_"))),
+    Q35_Average = mean(c_across(starts_with("Q35_")))
+  ) %>%
+  ungroup()
+
+summary(brand_ratings$Q35_Total)
+# graph Q35 total
+ggplot(brand_ratings, aes(x = Q35_Total)) +
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(title = "Brand Rating Scores for Old Navy",
+       x = "Total Score",
+       y = "Count") +
+  theme_minimal()
+
+# total and average brand ratings for Q39
+brand_ratings <- brand_ratings %>%
+  rowwise() %>%
+  mutate(
+    Q39_Total = sum(c_across(starts_with("Q39_"))),
+    Q39_Average = mean(c_across(starts_with("Q39_")))
+  ) %>%
+  ungroup()
+
+#head(brand_ratings, 10)
+
+# graph Q39
+ggplot(brand_ratings, aes(x = Q39_Total)) +
+  geom_histogram(fill = "lightblue", color = "white") +
+  labs(title = "Brand Rating Scores for Lululemon",
+       x = "Total Score",
+       y = "Count") +
+  theme_minimal()
+```
+
+
+
+
+
+# T-tests
+```{r}
+# Self-esteem and groups: Lululemon & Old Navy
+t_test_result_RSE <- t.test(RSE_Total ~ BrandCheck, data = survey_data)
+print(t_test_result_RSE)
+
+# Parasocial relationships and groups: Lululemon & Old Navy
+t_test_result_PSR <- t.test(PSR_Total ~ BrandCheck, data = survey_data)
+print(t_test_result_PSR)
+
+
+# Interested to see if self esteem was effected by hours per day spent on social media
+t_test_result_hours <- aov(RSE_Total ~ HoursPerDay, data = survey_data)
+summary(t_test_result_hours)
+
+# parasocial relationships and hours per day is significant! 
+hours_per_day_test_PSR <- aov(PSR_Total ~ HoursPerDay, data = survey_data)
+summary(hours_per_day_test_PSR)
+
+# main purpose is also significant with PSR, not with RSE
+main_purpose_test_PSR <- aov(PSR_Total ~ MainPurpose, data = survey_data)
+summary(main_purpose_test_PSR)
+
+main_purpose_test_RSE <- aov(RSE_Total ~ MainPurpose, data = survey_data)
+summary(main_purpose_test_RSE)
+
+# interacting with influencers is significant on PSR, not with RSE
+Interaction_with_influencers_test_PSR <- aov(PSR_Total ~ InteractWithInfluencers, data = survey_data)
+summary(Interaction_with_influencers_test_PSR)
+
+Interaction_with_influencers_test_RSE <- aov(RSE_Total ~ InteractWithInfluencers, data = survey_data)
+summary(Interaction_with_influencers_test_RSE)
+
+# Income significant with RSE
+income_test <- aov(RSE_Total ~ Income, data = survey_data)
+summary(income_test)
+
+# Marital status significant with RSE
+marital_test <- aov(RSE_Total ~ MaritalStatus, data = survey_data)
+summary(marital_test)
+```
 
 
 
