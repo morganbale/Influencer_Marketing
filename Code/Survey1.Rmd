@@ -6,21 +6,23 @@ output:
 date: "2025-03-15"
 ---
 
-
 ```{r}
 library(tidyverse)
 library(tidyr)
 library(dplyr)
 ```
 
-
 # Read in Data
+
 ```{r}
+raw_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
+
 survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
 # head(survey_data)
 ```
 
 # Fix Column Names
+
 ```{r}
 # get rid of columns
 survey_data <- survey_data %>%
@@ -78,8 +80,8 @@ survey_data <- survey_data %>%
 #head(survey_data)
 ```
 
-
 # Filter the Data
+
 ```{r}
 # only females
 survey_data <- survey_data %>%
@@ -87,7 +89,7 @@ survey_data <- survey_data %>%
 
 # filter out people who took less than 60 seconds
 survey_data <- survey_data %>%
-  filter(Duration_sec >= 60)
+  filter(Duration_sec > 120)
 
 # product check
 survey_data <- survey_data %>%
@@ -101,10 +103,29 @@ survey_data <- survey_data %>%
 #head(survey_data, 10)
 ```
 
+95.3% of respondents use social media. The median amount of time the survey took was 219.5 seconds (\~ 3 minutes and 40 seconds). 319 respondents passed the attention checks (87%).
+
+```{r}
+# percentage of respondents who use social media 
+raw_data %>%
+  count(X..ImportId...QID1..) %>%
+  mutate(percent = (n / nrow(raw_data)) * 100)
+
+# median amount of time the survey took
+median(raw_data$X..ImportId...duration.., na.rm = TRUE)
+
+# how many passed the attention checks %   
+(nrow(survey_data) / nrow(raw_data)) * 100 
+# (clean data with filters for attention checks / the raw data) 
+
+# number of respondents that passed the attention checks
+nrow(survey_data)
+```
 
 # Recode the self-esteem Question
-"scored by totaling the individual 4 point items after reverse-scoring the negatively worded items."
-higher score = better self-esteem
+
+"scored by totaling the individual 4 point items after reverse-scoring the negatively worded items." higher score = better self-esteem
+
 ```{r}
 
 # Rename columns
@@ -145,52 +166,63 @@ summary(survey_data$RSE_Total)
 ```
 
 # Self-esteem
+
 ```{r}
 # total self-esteem scores
-ggplot(survey_data, aes(x = RSE_Total)) +
-  geom_histogram(binwidth = 2, fill = "seagreen", color = "white") +
+ggplot(survey_data, aes(x = RSE_Total, y = after_stat(prop), group = 1)) +
+  geom_bar(binwidth = 2, fill = "seagreen", color = "white") +
   labs(title = "Distribution of Self-Esteem Scores",
-       x = "Total Self-Esteem Score",
-       y = "Count") +
-  theme_minimal()
+       x = "",
+       y = "") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 
 # average self-esteem scores
-ggplot(survey_data, aes(x = RSE_Average)) +
-  geom_histogram(fill = "seagreen", color = "white") +
+ggplot(survey_data, aes(x = RSE_Average, y = after_stat(prop), group = 1)) +
+  geom_bar(fill = "seagreen", color = "white") +
   labs(title = "Distribution of Average Self-Esteem Scores",
-       x = "Average Self-Esteem Score",
-       y = "Count") +
-  theme_minimal()
+       x = "",
+       y = "") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 ```
-
 
 # Overview of Demographics
+
 ```{r}
-# Age
-ggplot(survey_data, aes(x = Age)) +
+# Age 
+ggplot(survey_data, aes(x = Age, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Age Group Distribution", x = "Age Group", y = "Count")
+  labs(title = "Age Group Distribution", y = "", x ="") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 
 # Employment
-ggplot(survey_data, aes(x = Employment)) +
+ggplot(survey_data, aes(x = Employment, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Employment Group Distribution", x = "Employment Group", y = "Count") +
-  theme(axis.text.x = element_text(angle = 55, hjust = 1))
+  labs(title = "Employment Group Distribution", y = "", x ="") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 55, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format()) 
 
 # Marital Status
-ggplot(survey_data, aes(x = MaritalStatus)) +
+ggplot(survey_data, aes(x = MaritalStatus, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Marital Status Distribution", x = "Marital Status", y = "Count") 
+  labs(title = "Marital Status Distribution", y = "", x = "") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 
 # Income Status
-ggplot(survey_data, aes(x = Income)) +
+ggplot(survey_data, aes(x = Income, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Income Status Distribution", x = "Income Status", y = "Count") +
-  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(title = "Income Status Distribution", y = "", x = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format())
 ```
 
+# Describing the Data
 
-# Describing the Data 
 ```{r}
 # Time to take survey
 ggplot(survey_data, aes(x = Duration_sec)) +
@@ -199,55 +231,71 @@ ggplot(survey_data, aes(x = Duration_sec)) +
        x = "Duration (seconds)", 
        y = "Number of Participants")
 
-# Uses Social media?
-ggplot(survey_data, aes(x = UsesSocialMedia)) +
+# Use Social media?
+ggplot(survey_data, aes(x = UsesSocialMedia, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Do they use Social Media?", x = "Use social media?", y = "Count")
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Do you use any form of social media?", x = "", y = "")
 
 # Social Media Platforms
 # Split platforms into separate rows to graph
 platforms_long <- survey_data %>%
   separate_rows(PlatformsUsed, sep = ",\\s*")  
 
-ggplot(platforms_long, aes(x = PlatformsUsed)) +
+ggplot(platforms_long, aes(x = PlatformsUsed, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Social Media Platforms Used", x = "Platform", y = "Count") +
+  labs(title = "Which social media do you use?", x = "", y = "") +
+  scale_y_continuous(labels = scales::percent_format()) +
   theme(axis.text.x = element_text(angle = 25, hjust = 1))
 # other platforms people use - 
 # X, Snapchat, Reddit, Twitter, YouTube, Truth Social, Bluesky, Tumblr, Nextdoor, Threads, Whatsapp, Discord
 unique(survey_data$OtherPlatforms)
 
 # Hours per day
-ggplot(survey_data, aes(x = HoursPerDay)) +
+ggplot(survey_data, aes(x = HoursPerDay, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Hours Per Day Spent on Social Media", x = "Hours", y = "Count")
+  labs(title = "How many hours per day do you spend on social media?", x = "", y = "") +
+  scale_y_continuous(labels = scales::percent_format()) 
 
 # Main purpose in using social media
-ggplot(survey_data, aes(x = MainPurpose)) +
+ggplot(survey_data, aes(x = MainPurpose, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Main Purpose when Using Social Media", x = "Purpose", y = "Count") +
-  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(title = "What is your main purpose for using social media? ", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format()) 
 # other reasons
 unique(survey_data$OtherReasons)
 
 # How Often do they Interact with Influencers
-ggplot(survey_data, aes(x = InteractWithInfluencers)) +
+ggplot(survey_data, aes(x = InteractWithInfluencers, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "How Often do they Interact with Influencers", x = "Frequency", y = "Count")
+  labs(title = "How often do you interact with influencer content (viewing, following, liking or commenting)?", x = "", y = "") +
+  scale_y_continuous(labels = scales::percent_format()) 
 
 # Influencers they know
 # Split influencers into separate rows to graph
 influencers_long <- survey_data %>%
   separate_rows(FamiliarInfluencers, sep = ",\\s*")  
 
-ggplot(influencers_long, aes(x = FamiliarInfluencers)) +
+ggplot(influencers_long, aes(x = FamiliarInfluencers, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Which Influencers they Know", x = "Influencer", y = "Count") +
-  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(title = "Which of the following influencers are you familiar with?", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format()) 
+
+# table of which influencers they know
+influencers_long %>%
+  group_by(FamiliarInfluencers) %>%
+  summarise(count = n()) %>%
+  mutate(percent = (count / sum(count)) * 100)
 
 ```
 
 # Parasocial Relationships
+Adapted the Celebrity-Persona Parasocial Interaction Scale. 
+"Participants are asked to rank their level of agreement with statements about their parasocial interaction with celebrities on a five-level scale: strongly disagree, disagree, neutral, agree, and strongly agree."
+Strongly disagree is 1 and it goes up to strongly agree, which is 5. The scale doesn't say to total it or average it, or reverse order anything, but the higher the score, the stronger parasocial relationship you have. 
+
 ```{r}
 # Rename columns
 survey_data <- survey_data %>%
@@ -303,10 +351,10 @@ ggplot(survey_data, aes(x = PSR_Average)) +
   theme_minimal()
 ```
 
+# Brand Ratings
 
+Q35(Old Navy) & Q39(Lululemon)
 
-# Brand Ratings 
-Q35(Old Navy) & Q39(Lululemon) 
 ```{r}
 # rename
 brand_ratings <- survey_data %>%
@@ -357,11 +405,8 @@ ggplot(brand_ratings, aes(x = Q39_Total)) +
   theme_minimal()
 ```
 
-
-
-
-
 # T-tests
+
 ```{r}
 # Self-esteem and groups: Lululemon & Old Navy
 t_test_result_RSE <- t.test(RSE_Total ~ BrandCheck, data = survey_data)
@@ -402,9 +447,3 @@ summary(income_test)
 marital_test <- aov(RSE_Total ~ MaritalStatus, data = survey_data)
 summary(marital_test)
 ```
-
-
-
-
-
-

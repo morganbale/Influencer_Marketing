@@ -36,6 +36,8 @@ library(dplyr)
 # Read in Data
 
 ``` r
+raw_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
+
 survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
 # head(survey_data)
 ```
@@ -133,7 +135,7 @@ survey_data <- survey_data %>%
 
 # filter out people who took less than 60 seconds
 survey_data <- survey_data %>%
-  filter(Duration_sec >= 60)
+  filter(Duration_sec > 120)
 
 # product check
 survey_data <- survey_data %>%
@@ -146,6 +148,45 @@ survey_data <- survey_data %>%
 
 #head(survey_data, 10)
 ```
+
+95.3% of respondents use social media. The median amount of time the
+survey took was 219.5 seconds (~ 3 minutes and 40 seconds). 319
+respondents passed the attention checks (87%).
+
+``` r
+# percentage of respondents who use social media 
+raw_data %>%
+  count(X..ImportId...QID1..) %>%
+  mutate(percent = (n / nrow(raw_data)) * 100)
+```
+
+    ##   X..ImportId...QID1..   n   percent
+    ## 1                        9  2.472527
+    ## 2                   No   8  2.197802
+    ## 3                  Yes 347 95.329670
+
+``` r
+# median amount of time the survey took
+median(raw_data$X..ImportId...duration.., na.rm = TRUE)
+```
+
+    ## [1] 219.5
+
+``` r
+# how many passed the attention checks %   
+(nrow(survey_data) / nrow(raw_data)) * 100 
+```
+
+    ## [1] 87.08791
+
+``` r
+# (clean data with filters for attention checks / the raw data) 
+
+# number of respondents that passed the attention checks
+nrow(survey_data)
+```
+
+    ## [1] 317
 
 # Recode the self-esteem Question
 
@@ -191,75 +232,86 @@ summary(survey_data$RSE_Total)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##    10.0    26.0    30.0    29.6    35.0    40.0
+    ##   10.00   26.00   30.00   29.62   35.00   40.00
 
 # Self-esteem
 
 ``` r
 # total self-esteem scores
-ggplot(survey_data, aes(x = RSE_Total)) +
-  geom_histogram(binwidth = 2, fill = "seagreen", color = "white") +
+ggplot(survey_data, aes(x = RSE_Total, y = after_stat(prop), group = 1)) +
+  geom_bar(binwidth = 2, fill = "seagreen", color = "white") +
   labs(title = "Distribution of Self-Esteem Scores",
-       x = "Total Self-Esteem Score",
-       y = "Count") +
-  theme_minimal()
+       x = "",
+       y = "") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
-
-``` r
-# average self-esteem scores
-ggplot(survey_data, aes(x = RSE_Average)) +
-  geom_histogram(fill = "seagreen", color = "white") +
-  labs(title = "Distribution of Average Self-Esteem Scores",
-       x = "Average Self-Esteem Score",
-       y = "Count") +
-  theme_minimal()
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-![](Survey1_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
-
-# Overview of Demographics
-
-``` r
-# Age
-ggplot(survey_data, aes(x = Age)) +
-  geom_bar(fill = "skyblue") +
-  labs(title = "Age Group Distribution", x = "Age Group", y = "Count")
-```
+    ## Warning in geom_bar(binwidth = 2, fill = "seagreen", color = "white"): Ignoring
+    ## unknown parameters: `binwidth`
 
 ![](Survey1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ``` r
-# Employment
-ggplot(survey_data, aes(x = Employment)) +
-  geom_bar(fill = "skyblue") +
-  labs(title = "Employment Group Distribution", x = "Employment Group", y = "Count") +
-  theme(axis.text.x = element_text(angle = 55, hjust = 1))
+# average self-esteem scores
+ggplot(survey_data, aes(x = RSE_Average, y = after_stat(prop), group = 1)) +
+  geom_bar(fill = "seagreen", color = "white") +
+  labs(title = "Distribution of Average Self-Esteem Scores",
+       x = "",
+       y = "") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 ```
 
 ![](Survey1_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
+# Overview of Demographics
+
 ``` r
-# Marital Status
-ggplot(survey_data, aes(x = MaritalStatus)) +
+# Age 
+ggplot(survey_data, aes(x = Age, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Marital Status Distribution", x = "Marital Status", y = "Count") 
+  labs(title = "Age Group Distribution", y = "", x ="") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-7-3.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+``` r
+# Employment
+ggplot(survey_data, aes(x = Employment, y = after_stat(prop), group = 1)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Employment Group Distribution", y = "", x ="") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 55, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format()) 
+```
+
+![](Survey1_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+
+``` r
+# Marital Status
+ggplot(survey_data, aes(x = MaritalStatus, y = after_stat(prop), group = 1)) +
+  geom_bar(fill = "skyblue") +
+  labs(title = "Marital Status Distribution", y = "", x = "") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::percent_format())
+```
+
+![](Survey1_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
 
 ``` r
 # Income Status
-ggplot(survey_data, aes(x = Income)) +
+ggplot(survey_data, aes(x = Income, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Income Status Distribution", x = "Income Status", y = "Count") +
-  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(title = "Income Status Distribution", y = "", x = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format())
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-7-4.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 # Describing the Data
 
@@ -272,16 +324,17 @@ ggplot(survey_data, aes(x = Duration_sec)) +
        y = "Number of Participants")
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ``` r
-# Uses Social media?
-ggplot(survey_data, aes(x = UsesSocialMedia)) +
+# Use Social media?
+ggplot(survey_data, aes(x = UsesSocialMedia, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Do they use Social Media?", x = "Use social media?", y = "Count")
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Do you use any form of social media?", x = "", y = "")
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
 
 ``` r
 # Social Media Platforms
@@ -289,13 +342,14 @@ ggplot(survey_data, aes(x = UsesSocialMedia)) +
 platforms_long <- survey_data %>%
   separate_rows(PlatformsUsed, sep = ",\\s*")  
 
-ggplot(platforms_long, aes(x = PlatformsUsed)) +
+ggplot(platforms_long, aes(x = PlatformsUsed, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Social Media Platforms Used", x = "Platform", y = "Count") +
+  labs(title = "Which social media do you use?", x = "", y = "") +
+  scale_y_continuous(labels = scales::percent_format()) +
   theme(axis.text.x = element_text(angle = 25, hjust = 1))
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
 
 ``` r
 # other platforms people use - 
@@ -348,22 +402,24 @@ unique(survey_data$OtherPlatforms)
 
 ``` r
 # Hours per day
-ggplot(survey_data, aes(x = HoursPerDay)) +
+ggplot(survey_data, aes(x = HoursPerDay, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Hours Per Day Spent on Social Media", x = "Hours", y = "Count")
+  labs(title = "How many hours per day do you spend on social media?", x = "", y = "") +
+  scale_y_continuous(labels = scales::percent_format()) 
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
 
 ``` r
 # Main purpose in using social media
-ggplot(survey_data, aes(x = MainPurpose)) +
+ggplot(survey_data, aes(x = MainPurpose, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Main Purpose when Using Social Media", x = "Purpose", y = "Count") +
-  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(title = "What is your main purpose for using social media? ", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format()) 
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
 
 ``` r
 # other reasons
@@ -394,12 +450,13 @@ unique(survey_data$OtherReasons)
 
 ``` r
 # How Often do they Interact with Influencers
-ggplot(survey_data, aes(x = InteractWithInfluencers)) +
+ggplot(survey_data, aes(x = InteractWithInfluencers, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "How Often do they Interact with Influencers", x = "Frequency", y = "Count")
+  labs(title = "How often do you interact with influencer content (viewing, following, liking or commenting)?", x = "", y = "") +
+  scale_y_continuous(labels = scales::percent_format()) 
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-6.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-6.png)<!-- -->
 
 ``` r
 # Influencers they know
@@ -407,15 +464,46 @@ ggplot(survey_data, aes(x = InteractWithInfluencers)) +
 influencers_long <- survey_data %>%
   separate_rows(FamiliarInfluencers, sep = ",\\s*")  
 
-ggplot(influencers_long, aes(x = FamiliarInfluencers)) +
+ggplot(influencers_long, aes(x = FamiliarInfluencers, y = after_stat(prop), group = 1)) +
   geom_bar(fill = "skyblue") +
-  labs(title = "Which Influencers they Know", x = "Influencer", y = "Count") +
-  theme(axis.text.x = element_text(angle = 25, hjust = 1))
+  labs(title = "Which of the following influencers are you familiar with?", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  scale_y_continuous(labels = scales::percent_format()) 
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-8-7.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-9-7.png)<!-- -->
+
+``` r
+# table of which influencers they know
+influencers_long %>%
+  group_by(FamiliarInfluencers) %>%
+  summarise(count = n()) %>%
+  mutate(percent = (count / sum(count)) * 100)
+```
+
+    ## # A tibble: 10 × 3
+    ##    FamiliarInfluencers count percent
+    ##    <chr>               <int>   <dbl>
+    ##  1 ""                      4   0.983
+    ##  2 "Alix Earle"           52  12.8  
+    ##  3 "Allison Kuch"         36   8.85 
+    ##  4 "Aspyn Ovard"          27   6.63 
+    ##  5 "Emilie Kiser"         10   2.46 
+    ##  6 "Leah Wei"              6   1.47 
+    ##  7 "Lo Beeston"            8   1.97 
+    ##  8 "None"                218  53.6  
+    ##  9 "Sabrina Blair"        12   2.95 
+    ## 10 "Taylor Paul"          34   8.35
 
 # Parasocial Relationships
+
+Adapted the Celebrity-Persona Parasocial Interaction Scale.
+“Participants are asked to rank their level of agreement with statements
+about their parasocial interaction with celebrities on a five-level
+scale: strongly disagree, disagree, neutral, agree, and strongly agree.”
+Strongly disagree is 1 and it goes up to strongly agree, which is 5. The
+scale doesn’t say to total it or average it, or reverse order anything,
+but the higher the score, the stronger parasocial relationship you have.
 
 ``` r
 # Rename columns
@@ -455,14 +543,14 @@ summary(survey_data$PSR_Total)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##    8.00   11.00   15.00   15.78   18.00   40.00
+    ##    8.00   11.00   15.00   15.73   18.00   40.00
 
 ``` r
 summary(survey_data$PSR_Average)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   1.778   2.444   3.333   3.507   4.000   8.889
+    ##   1.778   2.444   3.333   3.495   4.000   8.889
 
 ``` r
 # total PSR
@@ -474,7 +562,7 @@ ggplot(survey_data, aes(x = PSR_Total)) +
   theme_minimal()
 ```
 
-![](Survey1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 # average PSR
@@ -488,7 +576,7 @@ ggplot(survey_data, aes(x = PSR_Average)) +
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](Survey1_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 # Brand Ratings
 
@@ -519,7 +607,7 @@ summary(brand_ratings$Q35_Total)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##   3.000   4.000   6.000   5.809   7.000  12.000     164
+    ##   3.000   4.000   6.000   5.814   7.000  12.000     161
 
 ``` r
 # graph Q35 total
@@ -533,10 +621,10 @@ ggplot(brand_ratings, aes(x = Q35_Total)) +
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 164 rows containing non-finite outside the scale range
+    ## Warning: Removed 161 rows containing non-finite outside the scale range
     ## (`stat_bin()`).
 
-![](Survey1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 # total and average brand ratings for Q39
@@ -561,10 +649,10 @@ ggplot(brand_ratings, aes(x = Q39_Total)) +
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-    ## Warning: Removed 157 rows containing non-finite outside the scale range
+    ## Warning: Removed 156 rows containing non-finite outside the scale range
     ## (`stat_bin()`).
 
-![](Survey1_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](Survey1_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 # T-tests
 
@@ -578,13 +666,13 @@ print(t_test_result_RSE)
     ##  Welch Two Sample t-test
     ## 
     ## data:  RSE_Total by BrandCheck
-    ## t = 1.2715, df = 317.96, p-value = 0.2045
+    ## t = 1.1808, df = 314.4, p-value = 0.2386
     ## alternative hypothesis: true difference in means between group Lululemon and group Old Navy is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.5213044  2.4261514
+    ##  -0.5924505  2.3709184
     ## sample estimates:
     ## mean in group Lululemon  mean in group Old Navy 
-    ##                30.06707                29.11465
+    ##                30.05590                29.16667
 
 ``` r
 # Parasocial relationships and groups: Lululemon & Old Navy
@@ -596,13 +684,13 @@ print(t_test_result_PSR)
     ##  Welch Two Sample t-test
     ## 
     ## data:  PSR_Total by BrandCheck
-    ## t = 1.0554, df = 312.36, p-value = 0.2921
+    ## t = 1.0246, df = 307.09, p-value = 0.3064
     ## alternative hypothesis: true difference in means between group Lululemon and group Old Navy is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.6655247  2.2055279
+    ##  -0.6933163  2.1997664
     ## sample estimates:
     ## mean in group Lululemon  mean in group Old Navy 
-    ##                16.15854                15.38854
+    ##                16.09938                15.34615
 
 ``` r
 # Interested to see if self esteem was effected by hours per day spent on social media
@@ -611,8 +699,8 @@ summary(t_test_result_hours)
 ```
 
     ##              Df Sum Sq Mean Sq F value Pr(>F)
-    ## HoursPerDay   4    128   32.09   0.709  0.586
-    ## Residuals   316  14293   45.23
+    ## HoursPerDay   4    105   26.18   0.579  0.678
+    ## Residuals   312  14106   45.21
 
 ``` r
 # parasocial relationships and hours per day is significant! 
@@ -621,8 +709,8 @@ summary(hours_per_day_test_PSR)
 ```
 
     ##              Df Sum Sq Mean Sq F value  Pr(>F)   
-    ## HoursPerDay   4    616  154.12   3.699 0.00584 **
-    ## Residuals   316  13164   41.66                   
+    ## HoursPerDay   4    619  154.78   3.716 0.00569 **
+    ## Residuals   312  12996   41.65                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -633,8 +721,8 @@ summary(main_purpose_test_PSR)
 ```
 
     ##              Df Sum Sq Mean Sq F value  Pr(>F)   
-    ## MainPurpose   5    724  144.74   3.492 0.00436 **
-    ## Residuals   315  13057   41.45                   
+    ## MainPurpose   5    725  144.95   3.497 0.00432 **
+    ## Residuals   311  12890   41.45                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -644,8 +732,8 @@ summary(main_purpose_test_RSE)
 ```
 
     ##              Df Sum Sq Mean Sq F value Pr(>F)
-    ## MainPurpose   5    293   58.51   1.304  0.262
-    ## Residuals   315  14128   44.85
+    ## MainPurpose   5    308   61.51   1.376  0.233
+    ## Residuals   311  13903   44.71
 
 ``` r
 # interacting with influencers is significant on PSR, not with RSE
@@ -654,8 +742,8 @@ summary(Interaction_with_influencers_test_PSR)
 ```
 
     ##                          Df Sum Sq Mean Sq F value   Pr(>F)    
-    ## InteractWithInfluencers   4   1384   345.9   8.817 9.25e-07 ***
-    ## Residuals               316  12397    39.2                     
+    ## InteractWithInfluencers   4   1385   346.3   8.836 9.06e-07 ***
+    ## Residuals               312  12229    39.2                     
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -665,8 +753,8 @@ summary(Interaction_with_influencers_test_RSE)
 ```
 
     ##                          Df Sum Sq Mean Sq F value Pr(>F)
-    ## InteractWithInfluencers   4    107   26.78   0.591  0.669
-    ## Residuals               316  14314   45.30
+    ## InteractWithInfluencers   4    117   29.29   0.648  0.628
+    ## Residuals               312  14094   45.17
 
 ``` r
 # Income significant with RSE
@@ -675,8 +763,8 @@ summary(income_test)
 ```
 
     ##              Df Sum Sq Mean Sq F value Pr(>F)  
-    ## Income        6    579   96.57   2.191 0.0437 *
-    ## Residuals   314  13842   44.08                 
+    ## Income        6    596   99.38   2.263 0.0375 *
+    ## Residuals   310  13615   43.92                 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -687,7 +775,7 @@ summary(marital_test)
 ```
 
     ##                Df Sum Sq Mean Sq F value  Pr(>F)   
-    ## MaritalStatus   4    748  187.11   4.325 0.00203 **
-    ## Residuals     316  13673   43.27                   
+    ## MaritalStatus   4    749  187.31   4.341 0.00197 **
+    ## Residuals     312  13462   43.15                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
