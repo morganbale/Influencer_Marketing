@@ -146,6 +146,9 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   filter(BrandCheck %in% c("Lululemon", "Old Navy"))
 
+
+
+
 #head(survey_data, 10)
 ```
 
@@ -594,65 +597,33 @@ brand_ratings <- survey_data %>%
     Q39_3 = `X..ImportId...QID39_3..`,
   )
 
-# total and average brand ratings for Q35
+# average brand ratings for Q35 & Q39
 brand_ratings <- brand_ratings %>%
   rowwise() %>%
   mutate(
-    Q35_Total = sum(c_across(starts_with("Q35_"))),
-    Q35_Average = mean(c_across(starts_with("Q35_")))
+    Q35_Average = mean(c(Q35_1, Q35_2, Q35_3), na.rm = TRUE),
+    Q39_Average = mean(c(Q39_1, Q39_2, Q39_3), na.rm = TRUE)
   ) %>%
   ungroup()
 
-summary(brand_ratings$Q35_Total)
+# put graphs side by side
+long_data <- brand_ratings %>%
+  pivot_longer(cols = c(Q35_Average, Q39_Average), 
+               names_to = "Brand", 
+               values_to = "Average_Rating") %>%
+  mutate(BrandCheck = factor(BrandCheck, levels = c("Old Navy", "Lululemon")))
+
+ggplot(long_data, aes(x = BrandCheck, y = Average_Rating, fill = BrandCheck)) +
+  geom_boxplot() +
+  labs(title = "Brand Ratings Comparison", y = "", x = "") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Old Navy" = "navyblue", "Lululemon" = "lightcoral"))
 ```
 
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-    ##   3.000   4.000   6.000   5.814   7.000  12.000     161
-
-``` r
-# graph Q35 total
-ggplot(brand_ratings, aes(x = Q35_Total)) +
-  geom_histogram(fill = "lightblue", color = "white") +
-  labs(title = "Brand Rating Scores for Old Navy",
-       x = "Total Score",
-       y = "Count") +
-  theme_minimal()
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-    ## Warning: Removed 161 rows containing non-finite outside the scale range
-    ## (`stat_bin()`).
+    ## Warning: Removed 317 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
 
 ![](Survey1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
-
-``` r
-# total and average brand ratings for Q39
-brand_ratings <- brand_ratings %>%
-  rowwise() %>%
-  mutate(
-    Q39_Total = sum(c_across(starts_with("Q39_"))),
-    Q39_Average = mean(c_across(starts_with("Q39_")))
-  ) %>%
-  ungroup()
-
-#head(brand_ratings, 10)
-
-# graph Q39
-ggplot(brand_ratings, aes(x = Q39_Total)) +
-  geom_histogram(fill = "lightblue", color = "white") +
-  labs(title = "Brand Rating Scores for Lululemon",
-       x = "Total Score",
-       y = "Count") +
-  theme_minimal()
-```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-    ## Warning: Removed 156 rows containing non-finite outside the scale range
-    ## (`stat_bin()`).
-
-![](Survey1_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 # T-tests
 

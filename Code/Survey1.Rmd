@@ -100,6 +100,9 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   filter(BrandCheck %in% c("Lululemon", "Old Navy"))
 
+
+
+
 #head(survey_data, 10)
 ```
 
@@ -224,12 +227,14 @@ ggplot(survey_data, aes(x = Income, y = after_stat(prop), group = 1)) +
 # Describing the Data
 
 ```{r}
+
 # Time to take survey
 ggplot(survey_data, aes(x = Duration_sec)) +
   geom_histogram(binwidth = 10, fill = "skyblue", color = "black") +
   labs(title = "Survey Completion Time Distribution",
        x = "Duration (seconds)", 
        y = "Number of Participants")
+
 
 # Use Social media?
 ggplot(survey_data, aes(x = UsesSocialMedia, y = after_stat(prop), group = 1)) +
@@ -367,43 +372,32 @@ brand_ratings <- survey_data %>%
     Q39_3 = `X..ImportId...QID39_3..`,
   )
 
-# total and average brand ratings for Q35
+# average brand ratings for Q35 & Q39
 brand_ratings <- brand_ratings %>%
   rowwise() %>%
   mutate(
-    Q35_Total = sum(c_across(starts_with("Q35_"))),
-    Q35_Average = mean(c_across(starts_with("Q35_")))
+    Q35_Average = mean(c(Q35_1, Q35_2, Q35_3), na.rm = TRUE),
+    Q39_Average = mean(c(Q39_1, Q39_2, Q39_3), na.rm = TRUE)
   ) %>%
   ungroup()
 
-summary(brand_ratings$Q35_Total)
-# graph Q35 total
-ggplot(brand_ratings, aes(x = Q35_Total)) +
-  geom_histogram(fill = "lightblue", color = "white") +
-  labs(title = "Brand Rating Scores for Old Navy",
-       x = "Total Score",
-       y = "Count") +
-  theme_minimal()
+# put graphs side by side
+long_data <- brand_ratings %>%
+  pivot_longer(cols = c(Q35_Average, Q39_Average), 
+               names_to = "Brand", 
+               values_to = "Average_Rating") %>%
+  mutate(BrandCheck = factor(BrandCheck, levels = c("Old Navy", "Lululemon")))
 
-# total and average brand ratings for Q39
-brand_ratings <- brand_ratings %>%
-  rowwise() %>%
-  mutate(
-    Q39_Total = sum(c_across(starts_with("Q39_"))),
-    Q39_Average = mean(c_across(starts_with("Q39_")))
-  ) %>%
-  ungroup()
+ggplot(long_data, aes(x = BrandCheck, y = Average_Rating, fill = BrandCheck)) +
+  geom_boxplot() +
+  labs(title = "Brand Ratings Comparison", y = "", x = "") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Old Navy" = "navyblue", "Lululemon" = "lightcoral"))
 
-#head(brand_ratings, 10)
 
-# graph Q39
-ggplot(brand_ratings, aes(x = Q39_Total)) +
-  geom_histogram(fill = "lightblue", color = "white") +
-  labs(title = "Brand Rating Scores for Lululemon",
-       x = "Total Score",
-       y = "Count") +
-  theme_minimal()
 ```
+
+
 
 # T-tests
 
