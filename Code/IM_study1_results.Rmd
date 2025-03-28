@@ -134,7 +134,90 @@ t_test_result <- t.test(Q17_total ~ Q33, data = self_esteem)
 print(t_test_result)
 ```
 
+# Brand 
 
+```{r}
+old_navy <- clean_data %>% filter(Q33=="Old Navy") %>% 
+  filter(!is.na(`Q49_First Click`))
+lulu <- clean_data %>% filter(Q33=="Lululemon") %>% 
+  filter(!is.na(`Q50_First Click`))
+
+on_ratings <- old_navy %>% select(Q35_1, Q35_2, Q35_3) %>% mutate(brand="Old Navy")
+names(on_ratings)=c("Inexpensive-Expensive", "Low-High End", "Value-Luxury", "Brand")
+
+lulu_ratings <- lulu %>% select(Q39_1, Q39_2, Q39_3) %>% mutate(brand="Lululemon")
+names(lulu_ratings)=c("Inexpensive-Expensive", "Low-High End", "Value-Luxury", "Brand")
+
+brand_rate <- on_ratings %>% bind_rows(lulu_ratings)
+
+brand_rate %>%
+  pivot_longer(
+    cols = c(`Inexpensive-Expensive`, `Low-High End`, `Value-Luxury`),
+    names_to = "rating_type",
+    values_to = "rating"
+  )  %>%
+  group_by(Brand, rating_type) %>%
+  summarise(
+    mean_rating = mean(as.numeric(rating), na.rm = TRUE),
+    p5 = quantile(as.numeric(rating), 0.05, na.rm = TRUE),
+    p95 = quantile(as.numeric(rating), 0.95, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>% ggplot(aes(x = rating_type, y = mean_rating, color =as.factor(Brand))) +
+  geom_point(position = position_dodge(width = 0.4), size = 3) +
+  geom_errorbar(aes(ymin = p5, ymax = p95),
+                width = 0.2,
+                position = position_dodge(width = 0.4)) +
+  labs(x = "", y = "Rating", color="Brand") +
+  theme_minimal()
+```
+```{r}
+# Your original plotting pipeline, with modifications at the end
+brand_rate <- brand_rate %>%
+  pivot_longer(
+    cols = c(`Inexpensive-Expensive`, `Low-High End`, `Value-Luxury`),
+    names_to = "rating_type",
+    values_to = "rating"
+  ) %>%
+  group_by(Brand, rating_type) %>%
+  summarise(
+    mean_rating = mean(as.numeric(rating), na.rm = TRUE),
+    p5 = quantile(as.numeric(rating), 0.05, na.rm = TRUE),
+    p95 = quantile(as.numeric(rating), 0.95, na.rm = TRUE),
+    .groups = 'drop'
+  ) -> summary_df
+
+# Get x positions for rating types
+rating_levels <- c("Inexpensive-Expensive", "Low-High End", "Value-Luxury")
+top_labels <- c("Expensive", "High End", "Luxury")
+bottom_labels <- c("Inexpensive", "Low End", "Value")
+
+# Create the plot
+ggplot(brand_rate, aes(x = rating_type, y = mean_rating, color = as.factor(Brand))) +
+  geom_point(position = position_dodge(width = 0.4), size = 3) +
+  geom_errorbar(aes(ymin = p5, ymax = p95),
+                width = 0.2,
+                position = position_dodge(width = 0.4)) +
+  labs(x = NULL, y = "Rating", color = "Brand") +
+  scale_x_discrete(limits = rating_levels, labels = rep("", length(rating_levels))) +  # Hide default labels
+  annotate("text", x = 1:3, y = max(summary_df$mean_rating) + 0.5, label = top_labels, size = 3.5, fontface = "italic") +
+  annotate("text", x = 1:3, y = min(summary_df$mean_rating) - 0.9, label = bottom_labels, size = 3.5, fontface = "italic") +
+  theme_minimal()+
+  scale_color_manual(values = c("Lululemon" = "#D41C2C", "Old Navy" = "#00205B")) 
+
+```
+
+```{r}
+#overall mean rating with t test
+brates <- on_ratings %>% bind_rows(lulu_ratings) %>%
+  pivot_longer(
+    cols = c(`Inexpensive-Expensive`, `Low-High End`, `Value-Luxury`),
+    names_to = "rating_type",
+    values_to = "rating"
+  ) %>% select(-rating_type)
+
+# Perform t-test comparing Q17_total between Group A and B
+t.test(as.numeric(rating) ~ Brand, data = brates)
+```
 
 
 
