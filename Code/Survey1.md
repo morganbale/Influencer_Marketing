@@ -13,118 +13,9 @@ Influencer Marketing Survey 1
 - [Brand Ratings](#brand-ratings)
 - [T-tests](#t-tests)
 
-``` r
-library(tidyverse)
-```
-
-    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-    ## ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-    ## ✔ purrr     1.0.2     
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-``` r
-library(tidyr)
-library(dplyr)
-```
-
 # Read in Data
 
-``` r
-raw_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
-
-survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
-# head(survey_data)
-```
-
 # Fix Column Names
-
-``` r
-# get rid of columns
-survey_data <- survey_data %>%
-  select(-c(X..ImportId...startDate...timeZone...America.Denver..,
-            X..ImportId...endDate...timeZone...America.Denver.., 
-            X..ImportId...finished.., # all were true
-            X..ImportId...status..,  # all were IP address, besides the first one-Survey Preview
-            X..ImportId...ipAddress.., 
-            X..ImportId...progress..,  # all were 100
-            X..ImportId...recordedDate...timeZone...America.Denver.., 
-            X..ImportId...recipientLastName.., 
-            X..ImportId...recipientFirstName.., 
-            X..ImportId...recipientEmail.., 
-            X..ImportId...externalDataReference.., 
-            X..ImportId...locationLatitude.., 
-            X..ImportId...locationLongitude.., 
-            X..ImportId...distributionChannel..,  #all were anonymous, except first -preview
-            X..ImportId...userLanguage..,  # all were english
-            X..ImportId...QID53_FIRST_CLICK.., #dont think we need when they clicked on the page while viewing the ad?
-            X..ImportId...QID53_LAST_CLICK..,
-            X..ImportId...QID53_PAGE_SUBMIT..,
-            X..ImportId...QID53_CLICK_COUNT..,
-            X..ImportId...QID52_FIRST_CLICK..,
-            X..ImportId...QID52_LAST_CLICK..,
-            X..ImportId...QID52_PAGE_SUBMIT..,
-            X..ImportId...QID52_CLICK_COUNT..
-            ))
-
-# rename column names
-colnames(survey_data)
-```
-
-    ##  [1] "X..ImportId...duration.."         "X..ImportId..._recordId.."       
-    ##  [3] "X..ImportId...Q_RecaptchaScore.." "X..ImportId...QID22.."           
-    ##  [5] "X..ImportId...QID1.."             "X..ImportId...QID5.."            
-    ##  [7] "X..ImportId...QID5_6_TEXT.."      "X..ImportId...QID6.."            
-    ##  [9] "X..ImportId...QID20.."            "X..ImportId...QID20_5_TEXT.."    
-    ## [11] "X..ImportId...QID21.."            "X..ImportId...QID40.."           
-    ## [13] "X..ImportId...QID14.."            "X..ImportId...QID33.."           
-    ## [15] "X..ImportId...QID35_1.."          "X..ImportId...QID35_2.."         
-    ## [17] "X..ImportId...QID35_3.."          "X..ImportId...QID39_1.."         
-    ## [19] "X..ImportId...QID39_2.."          "X..ImportId...QID39_3.."         
-    ## [21] "X..ImportId...QID42.."            "X..ImportId...QID16.."           
-    ## [23] "X..ImportId...QID37_1.."          "X..ImportId...QID37_2.."         
-    ## [25] "X..ImportId...QID37_3.."          "X..ImportId...QID37_4.."         
-    ## [27] "X..ImportId...QID37_5.."          "X..ImportId...QID37_6.."         
-    ## [29] "X..ImportId...QID37_7.."          "X..ImportId...QID37_8.."         
-    ## [31] "X..ImportId...QID17_1.."          "X..ImportId...QID17_2.."         
-    ## [33] "X..ImportId...QID17_3.."          "X..ImportId...QID17_4.."         
-    ## [35] "X..ImportId...QID17_5.."          "X..ImportId...QID17_6.."         
-    ## [37] "X..ImportId...QID17_7.."          "X..ImportId...QID17_8.."         
-    ## [39] "X..ImportId...QID17_9.."          "X..ImportId...QID17_10.."        
-    ## [41] "X..ImportId...QID7.."             "X..ImportId...QID9.."            
-    ## [43] "X..ImportId...QID10.."            "X..ImportId...QID47.."
-
-``` r
-survey_data <- survey_data %>%
-  rename(
-    Duration_sec = `X..ImportId...duration..`,
-    RecordId = X..ImportId..._recordId..,
-    RecaptchaScore = X..ImportId...Q_RecaptchaScore..,
-    Gender = `X..ImportId...QID22..`,
-    UsesSocialMedia = X..ImportId...QID1..,
-    PlatformsUsed = X..ImportId...QID5..,
-    OtherPlatforms = X..ImportId...QID5_6_TEXT..,
-    HoursPerDay = X..ImportId...QID6..,
-    MainPurpose = X..ImportId...QID20..,
-    OtherReasons = X..ImportId...QID20_5_TEXT..,
-    InteractWithInfluencers = X..ImportId...QID21..,
-    FamiliarInfluencers = X..ImportId...QID40..,
-    ProductCheck = X..ImportId...QID14..,
-    BrandCheck = X..ImportId...QID33..,
-    WhoPosted = X..ImportId...QID42..,
-    Influencer = X..ImportId...QID16..,
-    Age = X..ImportId...QID7..,
-    Employment = X..ImportId...QID9..,
-    MaritalStatus = X..ImportId...QID10..,
-    Income = X..ImportId...QID47..
-  )
-#head(survey_data)
-```
 
 # Filter the Data
 
@@ -141,19 +32,24 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   filter(ProductCheck == "Athletic Apparel") 
 
-# brand check... checks if they chose lululemon or old navy (might need to fix this later bc they could 
-# have just guessed) 
+# brand check... just get lulu and old navy responses
 survey_data <- survey_data %>%
   filter(BrandCheck %in% c("Lululemon", "Old Navy"))
 
-
-
+# really check if they chose the right brand they were assigned (Q52 is old navy) 
+old_navy <- survey_data %>% filter(BrandCheck=="Old Navy") %>% 
+  filter(!is.na(`X..ImportId...QID53_FIRST_CLICK..`))
+lulu <- survey_data %>% filter(BrandCheck=="Lululemon") %>% 
+  filter(!is.na(`X..ImportId...QID52_FIRST_CLICK..`))
+# found 2 that need to be removed...2 people assigned old navy chose lululemon
+survey_data <- survey_data %>%
+  filter(!RecordId %in% c("R_6hEhLNwdVlnzpJa", "R_3DvtWI0jOKAgPAd"))
 
 #head(survey_data, 10)
 ```
 
 95.3% of respondents use social media. The median amount of time the
-survey took was 219.5 seconds (~ 3 minutes and 40 seconds). 319
+survey took was 219.5 seconds (~ 3 minutes and 40 seconds). 315
 respondents passed the attention checks (87%).
 
 ``` r
@@ -180,7 +76,7 @@ median(raw_data$X..ImportId...duration.., na.rm = TRUE)
 (nrow(survey_data) / nrow(raw_data)) * 100 
 ```
 
-    ## [1] 87.08791
+    ## [1] 86.53846
 
 ``` r
 # (clean data with filters for attention checks / the raw data) 
@@ -189,7 +85,7 @@ median(raw_data$X..ImportId...duration.., na.rm = TRUE)
 nrow(survey_data)
 ```
 
-    ## [1] 317
+    ## [1] 315
 
 # Recode the self-esteem Question
 
@@ -235,7 +131,7 @@ summary(survey_data$RSE_Total)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   10.00   26.00   30.00   29.62   35.00   40.00
+    ##   10.00   26.00   30.00   29.61   35.00   40.00
 
 # Self-esteem
 
@@ -487,16 +383,16 @@ influencers_long %>%
     ## # A tibble: 10 × 3
     ##    FamiliarInfluencers count percent
     ##    <chr>               <int>   <dbl>
-    ##  1 ""                      4   0.983
-    ##  2 "Alix Earle"           52  12.8  
-    ##  3 "Allison Kuch"         36   8.85 
-    ##  4 "Aspyn Ovard"          27   6.63 
-    ##  5 "Emilie Kiser"         10   2.46 
-    ##  6 "Leah Wei"              6   1.47 
-    ##  7 "Lo Beeston"            8   1.97 
-    ##  8 "None"                218  53.6  
-    ##  9 "Sabrina Blair"        12   2.95 
-    ## 10 "Taylor Paul"          34   8.35
+    ##  1 ""                      4   0.993
+    ##  2 "Alix Earle"           52  12.9  
+    ##  3 "Allison Kuch"         36   8.93 
+    ##  4 "Aspyn Ovard"          27   6.70 
+    ##  5 "Emilie Kiser"         10   2.48 
+    ##  6 "Leah Wei"              6   1.49 
+    ##  7 "Lo Beeston"            7   1.74 
+    ##  8 "None"                217  53.8  
+    ##  9 "Sabrina Blair"        11   2.73 
+    ## 10 "Taylor Paul"          33   8.19
 
 # Parasocial Relationships
 
@@ -546,14 +442,14 @@ summary(survey_data$PSR_Total)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##    8.00   11.00   15.00   15.73   18.00   40.00
+    ##    8.00   11.00   15.00   15.68   18.00   40.00
 
 ``` r
 summary(survey_data$PSR_Average)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   1.778   2.444   3.333   3.495   4.000   8.889
+    ##   1.778   2.444   3.333   3.484   4.000   8.889
 
 ``` r
 # total PSR
@@ -620,7 +516,7 @@ ggplot(long_data, aes(x = BrandCheck, y = Average_Rating, fill = BrandCheck)) +
   scale_fill_manual(values = c("Old Navy" = "navyblue", "Lululemon" = "lightcoral"))
 ```
 
-    ## Warning: Removed 317 rows containing non-finite outside the scale range
+    ## Warning: Removed 315 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
 ![](Survey1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
@@ -637,13 +533,13 @@ print(t_test_result_RSE)
     ##  Welch Two Sample t-test
     ## 
     ## data:  RSE_Total by BrandCheck
-    ## t = 1.1808, df = 314.4, p-value = 0.2386
+    ## t = 1.1961, df = 311.78, p-value = 0.2326
     ## alternative hypothesis: true difference in means between group Lululemon and group Old Navy is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.5924505  2.3709184
+    ##  -0.58469  2.39779
     ## sample estimates:
     ## mean in group Lululemon  mean in group Old Navy 
-    ##                30.05590                29.16667
+    ##                30.05590                29.14935
 
 ``` r
 # Parasocial relationships and groups: Lululemon & Old Navy
@@ -655,13 +551,13 @@ print(t_test_result_PSR)
     ##  Welch Two Sample t-test
     ## 
     ## data:  PSR_Total by BrandCheck
-    ## t = 1.0246, df = 307.09, p-value = 0.3064
+    ## t = 1.1815, df = 304.99, p-value = 0.2383
     ## alternative hypothesis: true difference in means between group Lululemon and group Old Navy is not equal to 0
     ## 95 percent confidence interval:
-    ##  -0.6933163  2.1997664
+    ##  -0.5760642  2.3072895
     ## sample estimates:
     ## mean in group Lululemon  mean in group Old Navy 
-    ##                16.09938                15.34615
+    ##                16.09938                15.23377
 
 ``` r
 # Interested to see if self esteem was effected by hours per day spent on social media
@@ -670,8 +566,8 @@ summary(t_test_result_hours)
 ```
 
     ##              Df Sum Sq Mean Sq F value Pr(>F)
-    ## HoursPerDay   4    105   26.18   0.579  0.678
-    ## Residuals   312  14106   45.21
+    ## HoursPerDay   4    105   26.33   0.579  0.678
+    ## Residuals   310  14099   45.48
 
 ``` r
 # parasocial relationships and hours per day is significant! 
@@ -680,8 +576,8 @@ summary(hours_per_day_test_PSR)
 ```
 
     ##              Df Sum Sq Mean Sq F value  Pr(>F)   
-    ## HoursPerDay   4    619  154.78   3.716 0.00569 **
-    ## Residuals   312  12996   41.65                   
+    ## HoursPerDay   4    629  157.15   3.813 0.00483 **
+    ## Residuals   310  12776   41.21                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -692,8 +588,8 @@ summary(main_purpose_test_PSR)
 ```
 
     ##              Df Sum Sq Mean Sq F value  Pr(>F)   
-    ## MainPurpose   5    725  144.95   3.497 0.00432 **
-    ## Residuals   311  12890   41.45                   
+    ## MainPurpose   5    713  142.62   3.472 0.00455 **
+    ## Residuals   309  12692   41.07                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -703,8 +599,8 @@ summary(main_purpose_test_RSE)
 ```
 
     ##              Df Sum Sq Mean Sq F value Pr(>F)
-    ## MainPurpose   5    308   61.51   1.376  0.233
-    ## Residuals   311  13903   44.71
+    ## MainPurpose   5    311   62.19   1.383   0.23
+    ## Residuals   309  13894   44.96
 
 ``` r
 # interacting with influencers is significant on PSR, not with RSE
@@ -713,8 +609,8 @@ summary(Interaction_with_influencers_test_PSR)
 ```
 
     ##                          Df Sum Sq Mean Sq F value   Pr(>F)    
-    ## InteractWithInfluencers   4   1385   346.3   8.836 9.06e-07 ***
-    ## Residuals               312  12229    39.2                     
+    ## InteractWithInfluencers   4   1336   334.0   8.579 1.41e-06 ***
+    ## Residuals               310  12069    38.9                     
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -724,8 +620,8 @@ summary(Interaction_with_influencers_test_RSE)
 ```
 
     ##                          Df Sum Sq Mean Sq F value Pr(>F)
-    ## InteractWithInfluencers   4    117   29.29   0.648  0.628
-    ## Residuals               312  14094   45.17
+    ## InteractWithInfluencers   4    122   30.53   0.672  0.612
+    ## Residuals               310  14083   45.43
 
 ``` r
 # Income significant with RSE
@@ -734,8 +630,8 @@ summary(income_test)
 ```
 
     ##              Df Sum Sq Mean Sq F value Pr(>F)  
-    ## Income        6    596   99.38   2.263 0.0375 *
-    ## Residuals   310  13615   43.92                 
+    ## Income        6    617  102.86   2.332 0.0323 *
+    ## Residuals   308  13588   44.12                 
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -746,7 +642,7 @@ summary(marital_test)
 ```
 
     ##                Df Sum Sq Mean Sq F value  Pr(>F)   
-    ## MaritalStatus   4    749  187.31   4.341 0.00197 **
-    ## Residuals     312  13462   43.15                   
+    ## MaritalStatus   4    759  189.67   4.373 0.00187 **
+    ## Residuals     310  13446   43.37                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1

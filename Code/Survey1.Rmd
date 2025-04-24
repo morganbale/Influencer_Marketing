@@ -6,15 +6,15 @@ output:
 date: "2025-03-15"
 ---
 
-```{r}
+```{r, include=FALSE}
 library(tidyverse)
 library(tidyr)
 library(dplyr)
 ```
 
 # Read in Data
-
-```{r}
+Data is from our first survey using Qualtrics
+```{r, include=FALSE}
 raw_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
 
 survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", skip = 2)
@@ -22,8 +22,8 @@ survey_data <- read.csv("~/Downloads/im_study - Copy_March 17, 2025_10.43.csv", 
 ```
 
 # Fix Column Names
-
-```{r}
+Renamed the columns so they are shorter and got rid of unecessary columns. 
+```{r, include=FALSE}
 # get rid of columns
 survey_data <- survey_data %>%
   select(-c(X..ImportId...startDate...timeZone...America.Denver..,
@@ -39,13 +39,13 @@ survey_data <- survey_data %>%
             X..ImportId...externalDataReference.., 
             X..ImportId...locationLatitude.., 
             X..ImportId...locationLongitude.., 
-            X..ImportId...distributionChannel..,  #all were anonymous, except first -preview
-            X..ImportId...userLanguage..,  # all were english
-            X..ImportId...QID53_FIRST_CLICK.., #dont think we need when they clicked on the page while viewing the ad?
+            X..ImportId...distributionChannel..,  
+            X..ImportId...userLanguage..,  
+            
             X..ImportId...QID53_LAST_CLICK..,
             X..ImportId...QID53_PAGE_SUBMIT..,
             X..ImportId...QID53_CLICK_COUNT..,
-            X..ImportId...QID52_FIRST_CLICK..,
+
             X..ImportId...QID52_LAST_CLICK..,
             X..ImportId...QID52_PAGE_SUBMIT..,
             X..ImportId...QID52_CLICK_COUNT..
@@ -81,7 +81,7 @@ survey_data <- survey_data %>%
 ```
 
 # Filter the Data
-
+Remove respondents that are not female, finished too quickly or failed attention checks for brand & product. 
 ```{r}
 # only females
 survey_data <- survey_data %>%
@@ -95,18 +95,24 @@ survey_data <- survey_data %>%
 survey_data <- survey_data %>%
   filter(ProductCheck == "Athletic Apparel") 
 
-# brand check... checks if they chose lululemon or old navy (might need to fix this later bc they could 
-# have just guessed) 
+# brand check... just get lulu and old navy responses
 survey_data <- survey_data %>%
   filter(BrandCheck %in% c("Lululemon", "Old Navy"))
 
-
-
+# really check if they chose the right brand they were assigned (Q52 is old navy) 
+old_navy <- survey_data %>% filter(BrandCheck=="Old Navy") %>% 
+  filter(!is.na(`X..ImportId...QID53_FIRST_CLICK..`))
+lulu <- survey_data %>% filter(BrandCheck=="Lululemon") %>% 
+  filter(!is.na(`X..ImportId...QID52_FIRST_CLICK..`))
+# found 2 that need to be removed...2 people assigned old navy chose lululemon
+survey_data <- survey_data %>%
+  filter(!RecordId %in% c("R_6hEhLNwdVlnzpJa", "R_3DvtWI0jOKAgPAd"))
 
 #head(survey_data, 10)
 ```
 
-95.3% of respondents use social media. The median amount of time the survey took was 219.5 seconds (\~ 3 minutes and 40 seconds). 319 respondents passed the attention checks (87%).
+
+95.3% of respondents use social media. The median amount of time the survey took was 219.5 seconds (\~ 3 minutes and 40 seconds). 315 respondents passed the attention checks (87%).
 
 ```{r}
 # percentage of respondents who use social media 
