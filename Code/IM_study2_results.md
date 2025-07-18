@@ -164,7 +164,7 @@ clean_data %>%
   labs(y="", x="", title="What is your main purpose for using social media?") + theme_minimal() + coord_flip()
 ```
 
-    ## Warning: The following aesthetics were dropped during statistical transformation: fill.
+    ## Warning: The following aesthetics were dropped during statistical transformation: fill
     ## ℹ This can happen when ggplot fails to infer the correct grouping structure in
     ##   the data.
     ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
@@ -173,11 +173,64 @@ clean_data %>%
 ![](IM_study2_results_files/figure-gfm/unnamed-chunk-3-4.png)<!-- -->
 Influencer Content
 
+56% of people say they interact with influencer content daily, and 29%
+say 2-3 times per week.
+
 ``` r
 #how often do you interact with influencer content
-
-#which influencers do you know
+clean_data %>% group_by(Q21) %>% summarise(n=n()/nrow(clean_data))
 ```
+
+    ## # A tibble: 5 × 2
+    ##   Q21                n
+    ##   <chr>          <dbl>
+    ## 1 2-3 per week 0.290  
+    ## 2 Every day    0.566  
+    ## 3 Never        0.0640 
+    ## 4 Once a month 0.0774 
+    ## 5 <NA>         0.00337
+
+``` r
+#which influencers do you know
+clean_data %>% group_by(Q40) %>% summarise(n=n())
+```
+
+    ## # A tibble: 61 × 2
+    ##    Q40                                                                         n
+    ##    <chr>                                                                   <int>
+    ##  1 Alix Earle                                                                 37
+    ##  2 Alix Earle,Allison Kuch                                                     7
+    ##  3 Alix Earle,Allison Kuch,Lo Beeston                                          1
+    ##  4 Alix Earle,Alyssa White                                                     1
+    ##  5 Alix Earle,Alyssa White,Allison Kuch                                        1
+    ##  6 Alix Earle,Alyssa White,Allison Kuch,Sabrina Blair                          1
+    ##  7 Alix Earle,Alyssa White,Aspyn Ovard,Allison Kuch,Sabrina Blair              1
+    ##  8 Alix Earle,Alyssa White,Aspyn Ovard,Sabrina Blair                           1
+    ##  9 Alix Earle,Alyssa White,Aspyn Ovard,Taylor Paul,Allison Kuch                1
+    ## 10 Alix Earle,Alyssa White,Aspyn Ovard,Taylor Paul,Allison Kuch,Leah Wei,…     1
+    ## # ℹ 51 more rows
+
+``` r
+# Convert to tidy format
+response_df <- clean_data %>%
+  separate_rows(Q40, sep = ",") %>%
+  mutate(Q40_response = str_trim(Q40))  # remove leading/trailing spaces
+
+# Count and plot
+response_df %>%
+  count(Q40_response, sort = TRUE) %>%
+  ggplot(aes(x = fct_reorder(Q40_response, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Influencers Recognized by Respondents",
+    x = "",
+    y = "Number of Respondents"
+  ) +
+  theme_minimal(base_size = 14)
+```
+
+![](IM_study2_results_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 # Influencer vs Brand
 
@@ -483,7 +536,7 @@ results_summary3 %>% filter(p_value < .05)
     ## <0 rows> (or 0-length row.names)
 
 ``` r
-# I feel self concious is higher for those who saw the influencer ad at the 10% significance level 
+# I feel self conscious is higher for those who saw the influencer ad at the 10% significance level 
 results_summary3 %>% filter(p_value < .10)
 ```
 
@@ -524,4 +577,117 @@ results_summary4 %>% filter(p_value < .05)
 
 # Stimuli
 
+88% said they have never heard of the brand used in the study “Siply”.
+92% said they have never heard of the influencer used in the study
+“Sienna Blake”. 42% of respondents thought Siply was AI generated, 61%
+said Sienna Blake was AI generated.
+
+``` r
+#have you heard of the brand Siply
+clean_data %>% group_by(Q88) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 2 × 2
+    ##   Q88       n
+    ##   <chr> <dbl>
+    ## 1 No    0.886
+    ## 2 Yes   0.114
+
+``` r
+#have you heard of the influencer Sienna Blake
+clean_data %>% group_by(Q89) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 2 × 2
+    ##   Q89        n
+    ##   <chr>  <dbl>
+    ## 1 No    0.929 
+    ## 2 Yes   0.0707
+
+``` r
+#is siply real
+clean_data %>% group_by(Q92_1) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 3 × 2
+    ##   Q92_1     n
+    ##   <chr> <dbl>
+    ## 1 1     0.232
+    ## 2 2     0.343
+    ## 3 3     0.424
+
+``` r
+#is Sienna Blake real
+clean_data %>% group_by(Q92_2) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 3 × 2
+    ##   Q92_2     n
+    ##   <chr> <dbl>
+    ## 1 1     0.148
+    ## 2 2     0.242
+    ## 3 3     0.609
+
 # Demographics
+
+63% of respondents are 25-34 years old, 30% are 18-24 years old and 6%
+are 35-44 years old (which should just be 35 based on my Prolific
+screeners). 47% work full time, 44% have never been married and 33% are
+married. Most people have income between %25k-\$100k.
+
+``` r
+#age
+clean_data %>% group_by(Q7) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 3 × 2
+    ##   Q7                   n
+    ##   <chr>            <dbl>
+    ## 1 18-24 years old 0.303 
+    ## 2 25-34 years old 0.633 
+    ## 3 35-44 years old 0.0640
+
+``` r
+#employment status
+clean_data %>% group_by(Q9) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 6 × 2
+    ##   Q9                                      n
+    ##   <chr>                               <dbl>
+    ## 1 A homemaker or stay-at-home parent 0.104 
+    ## 2 Other                              0.0135
+    ## 3 Student                            0.0673
+    ## 4 Unemployed and looking for work    0.0640
+    ## 5 Working full-time                  0.471 
+    ## 6 Working part-time                  0.279
+
+``` r
+#marital status
+clean_data %>% group_by(Q10) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 5 × 2
+    ##   Q10                         n
+    ##   <chr>                   <dbl>
+    ## 1 Divorced/Separated    0.0236 
+    ## 2 Living with a partner 0.195  
+    ## 3 Married               0.333  
+    ## 4 Never been married    0.444  
+    ## 5 Widowed               0.00337
+
+``` r
+#income
+clean_data %>% group_by(Q47) %>% summarise(n=n()/nrow(clean_data))
+```
+
+    ## # A tibble: 7 × 2
+    ##   Q47                    n
+    ##   <chr>              <dbl>
+    ## 1 $100,000-$149,999 0.135 
+    ## 2 $150,000 or more  0.0640
+    ## 3 $25,000-$49,999   0.249 
+    ## 4 $50,000-$74,999   0.229 
+    ## 5 $75,000-$99,999   0.192 
+    ## 6 Less than $25,000 0.101 
+    ## 7 Prefer not to say 0.0303

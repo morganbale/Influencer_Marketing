@@ -93,10 +93,32 @@ clean_data %>%
   labs(y="", x="", title="What is your main purpose for using social media?") + theme_minimal() + coord_flip()
 ```
 Influencer Content
+
+56% of people say they interact with influencer content daily, and 29% say 2-3 times per week. 
 ```{r}
 #how often do you interact with influencer content
+clean_data %>% group_by(Q21) %>% summarise(n=n()/nrow(clean_data))
 
 #which influencers do you know
+clean_data %>% group_by(Q40) %>% summarise(n=n())
+
+# Convert to tidy format
+response_df <- clean_data %>%
+  separate_rows(Q40, sep = ",") %>%
+  mutate(Q40_response = str_trim(Q40))  # remove leading/trailing spaces
+
+# Count and plot
+response_df %>%
+  count(Q40_response, sort = TRUE) %>%
+  ggplot(aes(x = fct_reorder(Q40_response, n), y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Influencers Recognized by Respondents",
+    x = "",
+    y = "Number of Respondents"
+  ) +
+  theme_minimal(base_size = 14)
 ```
 
 # Influencer vs Brand 
@@ -241,7 +263,7 @@ results_summary3 <- data.frame(
 #no significant difference at the 5% level in social state self esteem
 results_summary3 %>% filter(p_value < .05)
 
-# I feel self concious is higher for those who saw the influencer ad at the 10% significance level 
+# I feel self conscious is higher for those who saw the influencer ad at the 10% significance level 
 results_summary3 %>% filter(p_value < .10)
 ```
 
@@ -270,6 +292,38 @@ results_summary4 %>% filter(p_value < .05)
 
 # Stimuli 
 
+88% said they have never heard of the brand used in the study "Siply". 92% said they have never heard of the influencer used in the study "Sienna Blake". 42% of respondents thought Siply was AI generated, 61% said Sienna Blake was AI generated.  
+```{r}
+#have you heard of the brand Siply
+clean_data %>% group_by(Q88) %>% summarise(n=n()/nrow(clean_data))
+
+#have you heard of the influencer Sienna Blake
+clean_data %>% group_by(Q89) %>% summarise(n=n()/nrow(clean_data))
+
+#is siply real
+clean_data %>% group_by(Q92_1) %>% summarise(n=n()/nrow(clean_data))
+
+#is Sienna Blake real
+clean_data %>% group_by(Q92_2) %>% summarise(n=n()/nrow(clean_data))
+```
+
+
 # Demographics 
+
+63% of respondents are 25-34 years old, 30% are 18-24 years old and 6% are 35-44 years old (which should just be 35 based on my Prolific screeners). 47% work full time, 44% have never been married and 33% are married. Most people have income between %25k-$100k. 
+```{r}
+#age
+clean_data %>% group_by(Q7) %>% summarise(n=n()/nrow(clean_data))
+
+#employment status
+clean_data %>% group_by(Q9) %>% summarise(n=n()/nrow(clean_data))
+
+#marital status
+clean_data %>% group_by(Q10) %>% summarise(n=n()/nrow(clean_data))
+
+#income
+clean_data %>% group_by(Q47) %>% summarise(n=n()/nrow(clean_data))
+```
+
 
 
